@@ -1,0 +1,28 @@
+.taskInput{
+   border: none;
+   outline-width: 0;
+   width:100%
+}
+
+.crossOut {
+   text-decoration: line-through
+}
+
+.taskHolder{
+   border-bottom: 0;
+   border-top: 0;
+   border-right: 0;
+   margin-top: 5px;
+}
+.taskHolder[size='2']{
+   height: 40px;
+   border-left: groove;
+}
+.taskHolder[size='3']{
+   height: 60px;
+   border-left: groove;
+}
+.taskHolder[size='4']{
+   height: 80px;
+   border-left: groove;
+}

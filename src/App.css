@@ -1,14 +1,20 @@
+
 .taskInput{
-   border: none;
-   outline-width: 0;
    width:100%
 }
+.labeledInput{
+   border: none;
+   outline-width: 0;
+}
+/* .taskLabel{
+} */
 
 .crossOut {
    text-decoration: line-through
 }
 
 .taskHolder{
+   min-height: 1em;
    border-bottom: 0;
    border-top: 0;
    border-right: 0;

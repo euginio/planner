@@ -1,48 +1,58 @@
 import React, { useEffect, useRef } from 'react'
 import './App.css'
 
-const Task = ({ task, handlers, debug }) => {
+const Task = ({ task, listHandlers, debug }) => {
    const taskInputRef = useRef()
 
    useEffect(() => {
       if (taskInputRef && taskInputRef.current) taskInputRef.current.focus()
    }, [task.focus])
 
-   const moveUp = () => handlers.handleMoveUp(task.id)
-   const moveDown = () => handlers.handleMoveDown(task.id)
-   const updateTask = () => handlers.updateTask(task)
+   const moveUp = () => listHandlers.moveUp(task.id)
+   const moveDown = () => listHandlers.moveDown(task.id)
+   const updateTask = () => listHandlers.updateTask(task)
 
    const increaseSize = () => {
-      task.size = task.size >= 0 ? task.size + 1 : 1
-      task.focus = true // why I need to set focus = true here?
+      task.size++
       updateTask()
    }
    const decreaseSize = () => {
-      task.size = task.size > 0 ? task.size - 1 : 0
-      task.focus = true // why I need to set focus = true here?
+      if (task.size > 1) {
+         task.size--
+         updateTask()
+      }
+   }
+   const setDone = () => {
+      task.done = true
       updateTask()
    }
-   const onChangeCheckbox = () => {
-      handlers.markAsDone(task.id)
+   const updateText = () => {
+      task.text = taskInputRef.current.value
+      updateTask()
+   }
+
+   const markAsDone = () => {
+      setDone()
+      listHandlers.focusDown(task.id)
    }
    const deleteTask = () => {
-      handlers.handleDelete(task.id)
+      listHandlers.delete(task.id)
    }
 
    const onClickTask = () => {
-      handlers.handleOnClick(task.id)
+      listHandlers.focusOn(task.id)
    }
 
    const handleInputKeyDown = e => {
       //['ctrlKey', 'shiftKey', 'altKey', 'metaKey']
       const updateKeys = ['Enter', 'ArrowUp', 'ArrowDown']
-      if (updateKeys.includes(e.key)) handlers.updateText(task.id, taskInputRef.current.value)
+
       if (e.key === 'Enter') {
          if (e.altKey) {
-            handlers.markAsDone(task.id)
-            handlers.focusDown(task.id)
+            markAsDone()
          } else {
-            handlers.addTask(task.id)
+            task.focus = false
+            listHandlers.addTask(task.id)
          }
       }
       if (e.key === 'ArrowUp') {
@@ -51,10 +61,10 @@ const Task = ({ task, handlers, debug }) => {
          } else if (e.altKey) {
             moveUp()
          } else {
-            e.preventDefault() // prevents put prompt at begining
             // e.stopPropagation()
-            handlers.focusUp(task.id)
+            listHandlers.focusUp(task.id)
          }
+         e.preventDefault() // prevents put prompt at begining
       }
       if (e.key === 'ArrowDown') {
          if (e.ctrlKey) {
@@ -62,7 +72,7 @@ const Task = ({ task, handlers, debug }) => {
          } else if (e.altKey) {
             moveDown()
          } else {
-            handlers.focusDown(task.id)
+            listHandlers.focusDown(task.id)
          }
       }
       if (
@@ -72,14 +82,25 @@ const Task = ({ task, handlers, debug }) => {
          deleteTask()
          e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
       }
+      if (e.ctrlKey) {
+         if (e.key === 'End') {
+            task.focus = false
+            listHandlers.focusOnLast()
+            e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
+         }
+         if (e.key === 'Home') {
+            task.focus = false
+            listHandlers.focusOnFirst()
+            e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
+         }
+      }
    }
-
    return (
       <li>
          <span>
             {debug && (
                <>
-                  <span onClick={onChangeCheckbox}>
+                  <span onClick={markAsDone}>
                      <input type='checkbox' checked={task.done} readOnly />
                      <label>{task.id})</label>
                   </span>
@@ -91,11 +112,12 @@ const Task = ({ task, handlers, debug }) => {
                   <input
                      ref={taskInputRef}
                      onKeyDown={handleInputKeyDown}
-                     defaultValue={task.name}
-                     className={`taskInput ${task.done ? 'crossOut' : ''}`}
+                     onChange={updateText}
+                     defaultValue={task.text}
+                     className={`taskInput labeledInput ${task.done && 'crossOut'}`}
                   />
                ) : (
-                  <label className={`${task.done ? 'crossOut' : ''}`}>{task.name}</label>
+                  <label className={`taskLabel ${task.done && 'crossOut'}`}>{task.text}</label>
                )}
             </div>
          </span>
@@ -104,7 +126,7 @@ const Task = ({ task, handlers, debug }) => {
                <button onClick={deleteTask}>X</button>
                <button onClick={moveUp}>^</button>
                <button onClick={moveDown}>¬</button>
-               <button onClick={() => handlers.handleMoveToBacklog(task.id)}>B</button>
+               <button onClick={() => listHandlers.handleMoveToBacklog(task.id)}>B</button>
             </>
          )}
       </li>

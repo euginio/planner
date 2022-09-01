@@ -22,18 +22,15 @@ const Task = ({ task, listHandlers, debug }) => {
          updateTask()
       }
    }
-   const setDone = () => {
-      task.done = true
-      updateTask()
-   }
    const updateText = () => {
       task.text = taskInputRef.current.value
       updateTask()
    }
 
-   const markAsDone = () => {
-      setDone()
-      listHandlers.focusDown(task.id)
+   const swipeDone = () => {
+      task.done = !task.done
+      updateTask()
+      if (task.done) listHandlers.focusDown(task.id)
    }
    const deleteTask = () => {
       listHandlers.delete(task.id)
@@ -49,7 +46,7 @@ const Task = ({ task, listHandlers, debug }) => {
 
       if (e.key === 'Enter') {
          if (e.altKey) {
-            markAsDone()
+            swipeDone()
          } else {
             task.focus = false
             listHandlers.addTask(task.id)
@@ -100,7 +97,7 @@ const Task = ({ task, listHandlers, debug }) => {
          <span>
             {debug && (
                <>
-                  <span onClick={markAsDone}>
+                  <span onClick={swipeDone}>
                      <input type='checkbox' checked={task.done} readOnly />
                      <label>{task.id})</label>
                   </span>

@@ -98,7 +98,7 @@ const TodoList = ({ name, todos, todosSetter, SheetHandlers, debug }) => {
 
    return (
       <>
-         <h3>TODO {name}</h3>
+         <h3>{name}</h3>
          <ul>
             {todos.map(todo => (
                <Task key={todo.id} task={todo} listHandlers={listHandlers} debug={debug}></Task>

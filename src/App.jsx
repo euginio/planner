@@ -86,7 +86,13 @@ function App() {
          td.done = !td.done
          setTodos(todosCp)
       },
+      isLastTask: id => todos.findIndex(t => t.id == id) == todos.length - 1,
       handleDelete: id => {
+         if (taskHandlers.isLastTask(id)) {
+            taskHandlers.focusUp(id)
+         } else {
+            taskHandlers.focusDown(id)
+         }
          const todoscp = [...todos]
          setDeletedTasks([...deletedTasks, todos.find(task => task.id == id)])
          const updatedTodos = todoscp.filter(task => task.id !== id)
@@ -166,8 +172,6 @@ function App() {
       <span>
          <h3>TODO today</h3>
          <TodoList todos={todos} taskHandlers={taskHandlers} debug={DEBUGG_MODE}></TodoList>
-         {/* <input ref={inputTextRef} autoFocus onKeyDown={handleKeyDown}></input>
-         <button onClick={handleAddTask}>Add task</button> */}
          <button onClick={hadleClearCompleted}>Clear complete</button>
          <p>
             {todos

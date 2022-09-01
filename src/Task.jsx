@@ -26,7 +26,6 @@ const Task = ({ task, handlers, debug }) => {
       handlers.markAsDone(task.id)
    }
    const deleteTask = () => {
-      handlers.focusDown(task.id)
       handlers.handleDelete(task.id)
    }
 

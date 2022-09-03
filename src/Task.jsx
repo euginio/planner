@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react'
+import { DEBUGG_MODE } from './App'
 import './App.css'
 
-const Task = ({ task, listHandlers, debug }) => {
+const Task = ({ task, listHandlers }) => {
    const taskInputRef = useRef()
 
    useEffect(() => {
@@ -95,7 +96,7 @@ const Task = ({ task, listHandlers, debug }) => {
    return (
       <li>
          <span>
-            {debug && (
+            {DEBUGG_MODE && (
                <>
                   <span onClick={swipeDone}>
                      <input type='checkbox' checked={task.done} readOnly />
@@ -118,7 +119,7 @@ const Task = ({ task, listHandlers, debug }) => {
                )}
             </div>
          </span>
-         {debug && (
+         {DEBUGG_MODE && (
             <>
                <button onClick={deleteTask}>X</button>
                <button onClick={moveUp}>^</button>

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useRef, useState } from 'react'
+import { DEBUGG_MODE } from './App'
 import TodoList from './TodoList'
 
 function Sheet({ name }) {
@@ -7,12 +8,12 @@ function Sheet({ name }) {
    const [backlog, setBacklog] = useState([])
    const [deletedTasks, setDeletedTasks] = useState([])
    const [done, setDone] = useState([])
-   // const inputTextRef = useRef()
+
+   // Why I can't declare these param-dependent constants inside useEffect[param] ??
    const LS_TODOS_KEY = name + '.todos'
    const LS_BACKLOG_KEY = name + '.backlog'
    const LS_DONE_KEY = name + '.done'
    const LS_DELETED_KEY = name + '.deleted'
-   const DEBUGG_MODE = false
 
    useEffect(() => {
       const loadedTodos = JSON.parse(localStorage.getItem(LS_TODOS_KEY))
@@ -45,7 +46,7 @@ function Sheet({ name }) {
       //    })
       //    setTodos(loadedTodos)
       // }
-   }, [])
+   }, [name])
 
    useEffect(() => {
       if (todos.length) localStorage.setItem(LS_TODOS_KEY, JSON.stringify(todos))
@@ -85,7 +86,6 @@ function Sheet({ name }) {
             todos={todos}
             todosSetter={setTodos}
             SheetHandlers={SheetHandlers}
-            debug={DEBUGG_MODE}
          ></TodoList>
          <button onClick={clearCompleted}>Clear complete</button>
 

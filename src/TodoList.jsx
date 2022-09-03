@@ -1,6 +1,6 @@
 import Task from './Task'
 
-const TodoList = ({ name, todos, todosSetter, SheetHandlers, debug }) => {
+const TodoList = ({ name, todos, todosSetter, SheetHandlers }) => {
    const listHandlers = {
       updateTask: task => {
          const todoscp = [...todos]
@@ -101,7 +101,7 @@ const TodoList = ({ name, todos, todosSetter, SheetHandlers, debug }) => {
          <h3>{name}</h3>
          <ul>
             {todos.map(todo => (
-               <Task key={todo.id} task={todo} listHandlers={listHandlers} debug={debug}></Task>
+               <Task key={todo.id} task={todo} listHandlers={listHandlers}></Task>
             ))}
          </ul>
       </>

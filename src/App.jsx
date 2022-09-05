@@ -12,7 +12,7 @@ function App() {
    useEffect(() => {
       // if (sheets.length > 0 && !currentSheet) setCurrentSheet(sheets[0])
       const loadedSheets = JSON.parse(localStorage.getItem(LS_SHEETS_KEY))
-      if (Object.keys(loadedSheets).length) setSheets(new Set(loadedSheets))
+      if (loadedSheets && Object.keys(loadedSheets).length) setSheets(new Set(loadedSheets))
    }, [])
 
    useEffect(() => {

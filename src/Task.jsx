@@ -24,7 +24,7 @@ const Task = ({ task, listHandlers }) => {
       }
    }
    const updateText = () => {
-      task.text = taskInputRef.current.value
+      task.text = taskInputRef.current.value.trim()
       updateTask()
    }
 
@@ -88,10 +88,16 @@ const Task = ({ task, listHandlers }) => {
          e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
       }
       if (e.altKey) {
-         if (e.key === 'ArrowRight') postpone()
+         if (e.key === 'ArrowRight') {
+            postpone()
+            e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
+         }
       }
       if (e.altKey) {
-         if (e.key === 'ArrowLeft') promote()
+         if (e.key === 'ArrowLeft') {
+            promote()
+            e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
+         }
       }
       if (e.ctrlKey) {
          if (e.key === 'End') {

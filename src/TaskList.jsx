@@ -27,7 +27,7 @@ const TaskList = ({ sheetName, name, taskMovement, sheetHandlers, activeList }) 
             return { ...t, focus: false }
          })
       )
-      if (activeList == name) {
+      if (activeList == name && tasks.length) {
          listHandlers.focusOnFirst()
       }
    }, [activeList])
@@ -163,7 +163,7 @@ const TaskList = ({ sheetName, name, taskMovement, sheetHandlers, activeList }) 
    }
 
    const clearCompleted = () => {
-      const newDone = tasks.filter(t => t.done).forEach(t => sheetHandlers.add('done', t))
+      tasks.filter(t => t.done).forEach(t => sheetHandlers.add('done', t))
       const newTasks = tasks.filter(t => !t.done)
       setTasks(newTasks)
    }

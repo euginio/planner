@@ -34,11 +34,15 @@ const Task = ({ task, listHandlers }) => {
       if (task.done) listHandlers.focusDown(task.id)
    }
    const deleteTask = () => {
-      listHandlers.delete(task.id)
+      listHandlers.deleteTask(task.id)
    }
 
    const onClickTask = () => {
       listHandlers.focusOn(task.id)
+   }
+
+   function postpone() {
+      listHandlers.postpone(task.id)
    }
 
    const handleInputKeyDown = e => {
@@ -79,6 +83,9 @@ const Task = ({ task, listHandlers }) => {
       ) {
          deleteTask()
          e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
+      }
+      if (e.altKey) {
+         if (e.key === 'ArrowRight') postpone()
       }
       if (e.ctrlKey) {
          if (e.key === 'End') {

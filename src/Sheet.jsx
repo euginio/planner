@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useRef, useState } from 'react'
 import { DEBUGG_MODE } from './App'
-import TodoList from './TodoList'
+import TaskList from './TaskList'
 
 function Sheet({ name }) {
    const [todos, setTodos] = useState([])
@@ -61,7 +61,7 @@ function Sheet({ name }) {
       if (done.length) localStorage.setItem(LS_DONE_KEY, JSON.stringify(done))
    }, [done])
 
-   const SheetHandlers = {
+   const sheetHandlers = {
       handleMoveToBacklog: id => {
          const todoscp = [...todos]
          setBacklog([...backlog, todos.find(task => task.id == id)])
@@ -70,6 +70,9 @@ function Sheet({ name }) {
       },
       addToDeleted: task => {
          setDeletedTasks(deletedTasks => [...deletedTasks, task])
+      },
+      postpone: todoTask => {
+         setBacklog(prevBacklog => [...prevBacklog, todoTask])
       },
    }
    const clearCompleted = () => {
@@ -81,12 +84,12 @@ function Sheet({ name }) {
    return (
       <span>
          <h2>Sheet {name}</h2>
-         <TodoList
+         <TaskList
             name='todo'
-            todos={todos}
-            todosSetter={setTodos}
-            SheetHandlers={SheetHandlers}
-         ></TodoList>
+            tasks={todos}
+            tasksSetter={setTodos}
+            sheetHandlers={sheetHandlers}
+         ></TaskList>
          <button onClick={clearCompleted}>Clear complete</button>
 
          <p>
@@ -103,16 +106,9 @@ function Sheet({ name }) {
                .reduce((prev, curr) => prev + curr, 0)}{' '}
             done pomodoros{' '}
          </p>
-         <h3>Backlog</h3>
-         {/* <TodoList todos={backlog}></TodoList> */}
-         {DEBUGG_MODE && (
-            <>
-               <h3>Removed</h3>
-               {/* <TodoList todos={deletedTasks}></TodoList> */}
-            </>
-         )}
-         <h3>DONE</h3>
-         {/* <TodoList todos={done}></TodoList> */}
+         <TaskList name='backlog' tasks={backlog}></TaskList>
+         {DEBUGG_MODE && <>{/* <TaskList name='deleted' tasks={deletedTasks}></TaskList> */}</>}
+         {<TaskList name='done' tasks={done}></TaskList>}
       </span>
    )
 }

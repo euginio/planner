@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Task from './Task'
 import TaskInfo from './TaskInfo'
 
-const TaskList = ({ sheetName, name, taskMovement, sheetHandlers }) => {
+const TaskList = ({ sheetName, name, taskMovement, sheetHandlers, activeList }) => {
    const [tasks, setTasks] = useState([])
    const LS_TASKS_KEY = sheetName + '.' + name
 
@@ -20,6 +20,17 @@ const TaskList = ({ sheetName, name, taskMovement, sheetHandlers }) => {
       //    setTasks(loadedTasks)
       // }
    }, [sheetName, name])
+
+   useEffect(() => {
+      setTasks(prevTasks =>
+         prevTasks.map(t => {
+            return { ...t, focus: false }
+         })
+      )
+      if (activeList == name) {
+         listHandlers.focusOnFirst()
+      }
+   }, [activeList])
 
    useEffect(() => {
       if (taskMovement.targetTaskList === name) {

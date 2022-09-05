@@ -4,21 +4,24 @@ import { DEBUGG_MODE } from './App'
 import TaskList from './TaskList'
 
 function Sheet({ name }) {
-   const sheets = ['todos', 'backlog', 'done', 'deleted']
+   const listNames = ['todos', 'backlog', 'done', 'deleted']
    const [taskMovement, setTaskMovement] = useState({})
-   const [activeList, setActiveList] = useState(sheets[0])
+   const [activeList, setActiveList] = useState(listNames[0])
 
    const sheetHandlers = {
       taskMoved: () => setTaskMovement({}),
       add: (taskListName, task) =>
          setTaskMovement({ targetTaskList: taskListName, taskToMove: { ...task, focus: false } }),
+      focusedOnMe: taskListName => setTaskMovement(taskListName),
    }
 
    function handleKeyDown(e) {
-      if (e.altKey) {
-         if (e.key === 'PageDown') {
-            console.log('pressing' + e.key)
-         } else {
+      if (e.altKey && ['PageDown', 'PageUp'].includes(e.key)) {
+         const activeListIdx = listNames.findIndex(l => l == activeList)
+         if (e.key === 'PageDown' && activeListIdx < listNames.length - 1) {
+            setActiveList(listNames[activeListIdx + 1])
+         } else if (e.key === 'PageUp' && activeListIdx > 0) {
+            setActiveList(listNames[activeListIdx - 1])
          }
       }
    }
@@ -26,6 +29,7 @@ function Sheet({ name }) {
       <div onKeyDown={handleKeyDown}>
          <h2>Sheet {name}</h2>
          <TaskList
+            activeList={activeList}
             sheetName={name}
             name='todos'
             taskMovement={taskMovement}
@@ -33,6 +37,7 @@ function Sheet({ name }) {
          ></TaskList>
 
          <TaskList
+            activeList={activeList}
             sheetName={name}
             name='backlog'
             taskMovement={taskMovement}
@@ -40,6 +45,7 @@ function Sheet({ name }) {
          ></TaskList>
          {
             <TaskList
+               activeList={activeList}
                sheetName={name}
                name='done'
                taskMovement={taskMovement}
@@ -48,6 +54,7 @@ function Sheet({ name }) {
          }
          {DEBUGG_MODE && (
             <TaskList
+               activeList={activeList}
                sheetName={name}
                name='deleted'
                taskMovement={taskMovement}

@@ -5,24 +5,6 @@ import TaskList from './TaskList'
 
 function Sheet({ name }) {
    const [taskToMove, setTaskToMove] = useState({})
-   // const [backlog, setBacklog] = useState([])
-   // const [deletedTasks, setDeletedTasks] = useState([])
-   // const [done, setDone] = useState([])
-
-   // // Why I can't declare these param-dependent constants inside useEffect[param] ??
-   // const LS_BACKLOG_KEY = name + '.backlog'
-   // const LS_DONE_KEY = name + '.done'
-   // const LS_DELETED_KEY = name + '.deleted'
-
-   // useEffect(() => {
-   //    if (backlog.length) localStorage.setItem(LS_BACKLOG_KEY, JSON.stringify(backlog))
-   // }, [backlog])
-   // useEffect(() => {
-   //    if (deletedTasks.length) localStorage.setItem(LS_DELETED_KEY, JSON.stringify(deletedTasks))
-   // }, [deletedTasks])
-   // useEffect(() => {
-   //    if (done.length) localStorage.setItem(LS_DONE_KEY, JSON.stringify(done))
-   // }, [done])
 
    const sheetHandlers = {
       taskToMoveUsed: () => setTaskToMove({}),

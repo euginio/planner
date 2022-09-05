@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Task from './Task'
 import TaskInfo from './TaskInfo'
 
-const TaskList = ({ sheetName, name, taskToMove: taskMovement, sheetHandlers }) => {
+const TaskList = ({ sheetName, name, taskMovement, sheetHandlers }) => {
    const [tasks, setTasks] = useState([])
    const LS_TASKS_KEY = sheetName + '.' + name
 
@@ -25,7 +25,7 @@ const TaskList = ({ sheetName, name, taskToMove: taskMovement, sheetHandlers }) 
       if (taskMovement.targetTaskList === name) {
          //is a new task for me, adding it...
          listHandlers.addTask(null, taskMovement.taskToMove)
-         sheetHandlers.taskToMoveUsed()
+         sheetHandlers.taskMoved()
       }
    }, [taskMovement])
 

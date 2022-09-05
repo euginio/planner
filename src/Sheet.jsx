@@ -4,47 +4,57 @@ import { DEBUGG_MODE } from './App'
 import TaskList from './TaskList'
 
 function Sheet({ name }) {
-   const [taskToMove, setTaskToMove] = useState({})
+   const sheets = ['todos', 'backlog', 'done', 'deleted']
+   const [taskMovement, setTaskMovement] = useState({})
+   const [activeList, setActiveList] = useState(sheets[0])
 
    const sheetHandlers = {
-      taskToMoveUsed: () => setTaskToMove({}),
+      taskMoved: () => setTaskMovement({}),
       add: (taskListName, task) =>
-         setTaskToMove({ targetTaskList: taskListName, taskToMove: { ...task, focus: false } }),
+         setTaskMovement({ targetTaskList: taskListName, taskToMove: { ...task, focus: false } }),
    }
 
+   function handleKeyDown(e) {
+      if (e.altKey) {
+         if (e.key === 'PageDown') {
+            console.log('pressing' + e.key)
+         } else {
+         }
+      }
+   }
    return (
-      <span>
+      <div onKeyDown={handleKeyDown}>
          <h2>Sheet {name}</h2>
          <TaskList
             sheetName={name}
             name='todos'
-            taskToMove={taskToMove}
+            taskMovement={taskMovement}
             sheetHandlers={sheetHandlers}
          ></TaskList>
 
          <TaskList
             sheetName={name}
             name='backlog'
-            taskToMove={taskToMove}
+            taskMovement={taskMovement}
             sheetHandlers={sheetHandlers}
          ></TaskList>
-         {DEBUGG_MODE && (
-            <TaskList
-               sheetName={name}
-               name='deleted'
-               taskToMove={taskToMove}
-               sheetHandlers={sheetHandlers}
-            ></TaskList>
-         )}
          {
             <TaskList
                sheetName={name}
                name='done'
-               taskToMove={taskToMove}
+               taskMovement={taskMovement}
                sheetHandlers={sheetHandlers}
             ></TaskList>
          }
-      </span>
+         {DEBUGG_MODE && (
+            <TaskList
+               sheetName={name}
+               name='deleted'
+               taskMovement={taskMovement}
+               sheetHandlers={sheetHandlers}
+            ></TaskList>
+         )}
+      </div>
    )
 }
 

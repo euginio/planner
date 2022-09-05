@@ -63,8 +63,11 @@ function Sheet({ name }) {
 
    const sheetHandlers = {
       handleMoveToBacklog: id => {
+         const taskToAdd = todos.find(task => task.id == id)
+         const maxBacklogTaskId = backlog.length ? Math.max(...backlog.map(t => t.id)) : 0
+         setBacklog([...backlog, { ...taskToAdd, id: maxBacklogTaskId + 1 }])
+
          const todoscp = [...todos]
-         setBacklog([...backlog, todos.find(task => task.id == id)])
          const updatedTodos = todoscp.filter(task => task.id !== id)
          setTodos(updatedTodos)
       },
@@ -72,7 +75,8 @@ function Sheet({ name }) {
          setDeletedTasks(deletedTasks => [...deletedTasks, task])
       },
       postpone: todoTask => {
-         setBacklog(prevBacklog => [...prevBacklog, todoTask])
+         const maxBacklogTaskId = backlog.length ? Math.max(...backlog.map(t => t.id)) : 0
+         setBacklog([{ ...todoTask, id: maxBacklogTaskId + 1, focus: false }, ...backlog])
       },
    }
    const clearCompleted = () => {
@@ -84,6 +88,18 @@ function Sheet({ name }) {
    return (
       <span>
          <h2>Sheet {name}</h2>
+         <p>
+            {todos
+               .filter(t => !t.done)
+               .map(t => t.size)
+               .reduce((prev, curr) => prev + curr, 0)}{' '}
+            pending{' '}
+            {todos
+               .filter(t => t.done)
+               .map(t => t.size)
+               .reduce((prev, curr) => prev + curr, 0)}{' '}
+            done{' '}
+         </p>
          <TaskList
             name='todo'
             tasks={todos}
@@ -92,23 +108,32 @@ function Sheet({ name }) {
          ></TaskList>
          <button onClick={clearCompleted}>Clear complete</button>
 
-         <p>
-            {todos
-               .filter(t => !t.done)
-               .map(t => t.size)
-               .reduce((prev, curr) => prev + curr, 0)}{' '}
-            pending pomodoros{' '}
-         </p>
-         <p>
-            {todos
-               .filter(t => t.done)
-               .map(t => t.size)
-               .reduce((prev, curr) => prev + curr, 0)}{' '}
-            done pomodoros{' '}
-         </p>
-         <TaskList name='backlog' tasks={backlog}></TaskList>
-         {DEBUGG_MODE && <>{/* <TaskList name='deleted' tasks={deletedTasks}></TaskList> */}</>}
-         {<TaskList name='done' tasks={done}></TaskList>}
+         <TaskList
+            name='backlog'
+            tasks={backlog}
+            tasksSetter={setBacklog}
+            sheetHandlers={sheetHandlers}
+         ></TaskList>
+         {DEBUGG_MODE && (
+            <>
+               {
+                  <TaskList
+                     name='deleted'
+                     tasks={deletedTasks}
+                     tasksSetter={setDeletedTasks}
+                     sheetHandlers={sheetHandlers}
+                  ></TaskList>
+               }
+            </>
+         )}
+         {
+            <TaskList
+               name='done'
+               tasks={done}
+               tasksSetter={setDone}
+               sheetHandlers={sheetHandlers}
+            ></TaskList>
+         }
       </span>
    )
 }

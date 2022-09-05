@@ -131,7 +131,7 @@ const Task = ({ task, listHandlers }) => {
                <button onClick={deleteTask}>X</button>
                <button onClick={moveUp}>^</button>
                <button onClick={moveDown}>¬</button>
-               <button onClick={() => listHandlers.handleMoveToBacklog(task.id)}>B</button>
+               <button onClick={postpone}>B</button>
             </>
          )}
       </li>

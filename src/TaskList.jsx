@@ -40,7 +40,7 @@ const TaskList = ({ name, tasks, tasksSetter, sheetHandlers }) => {
       },
       deleteTask: id => {
          sheetHandlers.addToDeleted(tasks.find(task => task.id == id))
-         sheetHandlers.remove(id)
+         listHandlers.remove(id)
       },
       moveUp: id => {
          const taskscp = [...tasks]
@@ -98,8 +98,9 @@ const TaskList = ({ name, tasks, tasksSetter, sheetHandlers }) => {
             return taskscp
          }),
       postpone: id => {
-         sheetHandlers.postpone(tasks.find(t => t.id == id))
+         const task = tasks.find(t => t.id == id)
          listHandlers.remove(id)
+         sheetHandlers.postpone(task)
       },
    }
 

@@ -8,19 +8,9 @@ function Sheet({ name }) {
 
    const sheetHandlers = {
       taskToMoveUsed: () => setTaskToMove({}),
-      addToDeleted: task =>
-         setTaskToMove({ targetTaskList: 'delete', taskToMove: { ...task, focus: false } }),
-      addToBacklog: task =>
-         setTaskToMove({ targetTaskList: 'backlog', taskToMove: { ...task, focus: false } }),
-      addToTodos: task =>
-         setTaskToMove({ targetTaskList: 'todos', taskToMove: { ...task, focus: false } }),
+      add: (taskListName, task) =>
+         setTaskToMove({ targetTaskList: taskListName, taskToMove: { ...task, focus: false } }),
    }
-   // const clearCompleted = () => {
-   //    const newDone = todos.filter(t => t.done)
-   //    setDone(prevDone => [...done, ...newDone])
-   //    const newTodos = todos.filter(t => !t.done)
-   //    setTodos(newTodos)
-   // }
 
    return (
       <span>
@@ -31,7 +21,6 @@ function Sheet({ name }) {
             taskToMove={taskToMove}
             sheetHandlers={sheetHandlers}
          ></TaskList>
-         {/* <button onClick={clearCompleted}>Clear complete</button> */}
 
          <TaskList
             sheetName={name}

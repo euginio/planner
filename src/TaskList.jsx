@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Task from './Task'
+import TaskInfo from './TaskInfo'
 
 const TaskList = ({ sheetName, name, taskToMove: taskMovement, sheetHandlers }) => {
    const [tasks, setTasks] = useState([])
@@ -128,39 +129,44 @@ const TaskList = ({ sheetName, name, taskToMove: taskMovement, sheetHandlers }) 
             return taskscp
          }),
       deleteTask: id => {
-         sheetHandlers.addToDeleted(tasks.find(task => task.id == id))
+         sheetHandlers.add(
+            'deleted',
+            tasks.find(task => task.id == id)
+         )
          remove(id)
       },
       postpone: id => {
-         sheetHandlers.addToBacklog(tasks.find(task => task.id == id))
+         sheetHandlers.add(
+            'backlog',
+            tasks.find(task => task.id == id)
+         )
          remove(id)
       },
       promote: id => {
-         sheetHandlers.addToTodos(tasks.find(task => task.id == id))
+         sheetHandlers.add(
+            'todos',
+            tasks.find(task => task.id == id)
+         )
          remove(id)
       },
    }
 
+   const clearCompleted = () => {
+      const newDone = tasks.filter(t => t.done).forEach(t => sheetHandlers.add('done', t))
+      const newTasks = tasks.filter(t => !t.done)
+      setTasks(newTasks)
+   }
+
    return (
       <>
-         <p>
-            {tasks
-               .filter(t => !t.done)
-               .map(t => t.size)
-               .reduce((prev, curr) => prev + curr, 0)}{' '}
-            pending{' '}
-            {tasks
-               .filter(t => t.done)
-               .map(t => t.size)
-               .reduce((prev, curr) => prev + curr, 0)}{' '}
-            done{' '}
-         </p>
+         <TaskInfo tasks={tasks}></TaskInfo>
          <h3>{name}</h3>
          <ul>
             {tasks.map(t => (
                <Task key={t.id} task={t} listHandlers={listHandlers}></Task>
             ))}
          </ul>
+         <button onClick={clearCompleted}>Clear complete</button>
       </>
    )
 }

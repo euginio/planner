@@ -76,10 +76,10 @@ function Sheet({ name }) {
       },
    }
    const clearCompleted = () => {
+      const newDone = todos.filter(t => t.done)
+      setDone(prevDone => [...done, ...newDone])
       const newTodos = todos.filter(t => !t.done)
       setTodos(newTodos)
-      const done = todos.filter(t => t.done)
-      setDone(done)
    }
    return (
       <span>

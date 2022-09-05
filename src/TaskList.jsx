@@ -1,47 +1,77 @@
+import { useEffect, useState } from 'react'
 import Task from './Task'
 
-const TaskList = ({ name, tasks, tasksSetter, sheetHandlers }) => {
+const TaskList = ({ sheetName, name, taskToMove: taskMovement, sheetHandlers }) => {
+   const [tasks, setTasks] = useState([])
+   const LS_TASKS_KEY = sheetName + '.' + name
+
+   useEffect(() => {
+      const loadedTasks = JSON.parse(localStorage.getItem(LS_TASKS_KEY))
+      if (loadedTasks) setTasks(loadedTasks)
+
+      //just one update db
+      // if (loadedTasks) {
+      //    loadedTasks.forEach(t => {
+      //       t.text = t.name
+      //       delete t.name
+      //       t.size = t.size || 1
+      //    })
+      //    setTasks(loadedTasks)
+      // }
+   }, [sheetName, name])
+
+   useEffect(() => {
+      if (taskMovement.targetTaskList === name) {
+         //is a new task for me, adding it...
+         listHandlers.addTask(null, taskMovement.taskToMove)
+         sheetHandlers.taskToMoveUsed()
+      }
+   }, [taskMovement])
+
+   useEffect(() => {
+      if (tasks.length) localStorage.setItem(LS_TASKS_KEY, JSON.stringify(tasks))
+   }, [tasks])
+
+   const remove = id => {
+      if (listHandlers.isLastTask(id)) {
+         listHandlers.focusUp(id)
+      } else {
+         listHandlers.focusDown(id)
+      }
+      const taskscp = [...tasks]
+      const updatedTasks = taskscp.filter(task => task.id !== id)
+      setTasks(updatedTasks)
+   }
+
    const listHandlers = {
       updateTask: task => {
          const taskscp = [...tasks]
          let td = taskscp.find(td => td.id === task.id)
          td = task
-         tasksSetter(taskscp)
+         setTasks(taskscp)
       },
-      addTask: aboveId => {
-         const maxTaskId = tasks.length ? Math.max(...tasks.map(t => t.id)) : 0
-         const newTask = {
+      addTask: (
+         aboveId,
+         newTask = {
             text: '',
             done: false,
             focus: true,
             size: 1,
-            id: maxTaskId + 1,
          }
+      ) => {
+         const maxTaskId = tasks.length ? Math.max(...tasks.map(t => t.id)) : 0
+         newTask.id = maxTaskId + 1
+
          if (aboveId) {
             let taskscp = [...tasks]
             const aboveTaskIdx = taskscp.findIndex(t => t.id == aboveId)
-            newTask.focus = true
             taskscp.splice(aboveTaskIdx + 1, 0, newTask)
-            tasksSetter(taskscp)
+            setTasks(taskscp)
          } else {
-            tasksSetter(prevTasks => [...prevTasks, newTask])
+            setTasks(prevTasks => [...prevTasks, newTask])
          }
       },
       isLastTask: id => tasks.findIndex(t => t.id == id) == tasks.length - 1,
-      remove: id => {
-         if (listHandlers.isLastTask(id)) {
-            listHandlers.focusUp(id)
-         } else {
-            listHandlers.focusDown(id)
-         }
-         const taskscp = [...tasks]
-         const updatedTasks = taskscp.filter(task => task.id !== id)
-         tasksSetter(updatedTasks)
-      },
-      deleteTask: id => {
-         sheetHandlers.addToDeleted(tasks.find(task => task.id == id))
-         listHandlers.remove(id)
-      },
       moveUp: id => {
          const taskscp = [...tasks]
          const currentIndex = taskscp.findIndex(t => t.id == id)
@@ -49,7 +79,7 @@ const TaskList = ({ name, tasks, tasksSetter, sheetHandlers }) => {
          currentTask.focus = true
          taskscp[currentIndex] = taskscp[currentIndex - 1]
          taskscp[currentIndex - 1] = currentTask
-         tasksSetter(taskscp)
+         setTasks(taskscp)
       },
       moveDown: id => {
          const taskscp = [...tasks]
@@ -58,14 +88,14 @@ const TaskList = ({ name, tasks, tasksSetter, sheetHandlers }) => {
          currentTask.focus = true
          taskscp[currentIndex] = taskscp[currentIndex + 1]
          taskscp[currentIndex + 1] = currentTask
-         tasksSetter(taskscp)
+         setTasks(taskscp)
       },
       focusOn: id => {
          const taskscp = [...tasks]
          const focusedTD = taskscp.find(t => t.focus == true)
          if (focusedTD) focusedTD.focus = false
          taskscp.find(td => td.id === id).focus = true
-         tasksSetter(taskscp)
+         setTasks(taskscp)
       },
       focusUp: id => {
          const taskscp = [...tasks]
@@ -74,7 +104,7 @@ const TaskList = ({ name, tasks, tasksSetter, sheetHandlers }) => {
             taskscp[tdIdx].focus = false
             taskscp[tdIdx - 1].focus = true
          }
-         tasksSetter(taskscp)
+         setTasks(taskscp)
       },
       focusDown: id => {
          const taskscp = [...tasks]
@@ -83,29 +113,48 @@ const TaskList = ({ name, tasks, tasksSetter, sheetHandlers }) => {
             taskscp[tdIdx].focus = false
             taskscp[tdIdx + 1].focus = true
          }
-         tasksSetter(taskscp)
+         setTasks(taskscp)
       },
       focusOnFirst: () =>
-         tasksSetter(prevTasks => {
+         setTasks(prevTasks => {
             let taskscp = [...prevTasks]
             taskscp[0].focus = true
             return taskscp
          }),
       focusOnLast: () =>
-         tasksSetter(prevTasks => {
+         setTasks(prevTasks => {
             let taskscp = [...prevTasks]
             taskscp[taskscp.length - 1].focus = true
             return taskscp
          }),
+      deleteTask: id => {
+         sheetHandlers.addToDeleted(tasks.find(task => task.id == id))
+         remove(id)
+      },
       postpone: id => {
-         const task = tasks.find(t => t.id == id)
-         listHandlers.remove(id)
-         sheetHandlers.postpone(task)
+         sheetHandlers.addToBacklog(tasks.find(task => task.id == id))
+         remove(id)
+      },
+      promote: id => {
+         sheetHandlers.addToTodos(tasks.find(task => task.id == id))
+         remove(id)
       },
    }
 
    return (
       <>
+         <p>
+            {tasks
+               .filter(t => !t.done)
+               .map(t => t.size)
+               .reduce((prev, curr) => prev + curr, 0)}{' '}
+            pending{' '}
+            {tasks
+               .filter(t => t.done)
+               .map(t => t.size)
+               .reduce((prev, curr) => prev + curr, 0)}{' '}
+            done{' '}
+         </p>
          <h3>{name}</h3>
          <ul>
             {tasks.map(t => (

@@ -44,6 +44,9 @@ const Task = ({ task, listHandlers }) => {
    function postpone() {
       listHandlers.postpone(task.id)
    }
+   function promote() {
+      listHandlers.promote(task.id)
+   }
 
    const handleInputKeyDown = e => {
       //['ctrlKey', 'shiftKey', 'altKey', 'metaKey']
@@ -86,6 +89,9 @@ const Task = ({ task, listHandlers }) => {
       }
       if (e.altKey) {
          if (e.key === 'ArrowRight') postpone()
+      }
+      if (e.altKey) {
+         if (e.key === 'ArrowLeft') promote()
       }
       if (e.ctrlKey) {
          if (e.key === 'End') {

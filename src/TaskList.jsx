@@ -3,12 +3,22 @@ import Task from './Task'
 import TaskInfo from './TaskInfo'
 
 const TaskList = ({ sheetName, name, taskMovement, sheetHandlers, activeList }) => {
-   const [tasks, setTasks] = useState([])
    const LS_TASKS_KEY = sheetName + '.' + name
+   const [tasks, setTasks] = useState([])
 
    useEffect(() => {
       const loadedTasks = JSON.parse(localStorage.getItem(LS_TASKS_KEY))
       if (loadedTasks) setTasks(loadedTasks)
+      else
+         setTasks([
+            {
+               text: '',
+               done: false,
+               focus: true,
+               size: 1,
+               id: 1,
+            },
+         ])
 
       //just one update db
       // if (loadedTasks) {
@@ -19,18 +29,24 @@ const TaskList = ({ sheetName, name, taskMovement, sheetHandlers, activeList }) 
       //    })
       //    setTasks(loadedTasks)
       // }
-   }, [sheetName, name])
+   }, [sheetName, name, LS_TASKS_KEY])
 
    useEffect(() => {
-      setTasks(prevTasks =>
-         prevTasks.map(t => {
-            return { ...t, focus: false }
-         })
-      )
-      if (activeList == name && tasks.length) {
-         listHandlers.focusOnFirst()
+      if (tasks.length) localStorage.setItem(LS_TASKS_KEY, JSON.stringify(tasks))
+   }, [tasks, LS_TASKS_KEY])
+
+   useEffect(() => {
+      if (tasks.length) {
+         setTasks(prevTasks =>
+            prevTasks.map(t => {
+               return { ...t, focus: false }
+            })
+         )
+         if (activeList === name) {
+            listHandlers.focusOnFirst()
+         }
       }
-   }, [activeList])
+   }, [activeList, tasks.length, name])
 
    useEffect(() => {
       if (taskMovement.targetTaskList === name) {
@@ -38,11 +54,7 @@ const TaskList = ({ sheetName, name, taskMovement, sheetHandlers, activeList }) 
          listHandlers.addTask(null, taskMovement.taskToMove)
          sheetHandlers.taskMoved()
       }
-   }, [taskMovement])
-
-   useEffect(() => {
-      if (tasks.length) localStorage.setItem(LS_TASKS_KEY, JSON.stringify(tasks))
-   }, [tasks])
+   }, [taskMovement, name])
 
    const remove = id => {
       if (listHandlers.isLastTask(id)) {
@@ -58,8 +70,8 @@ const TaskList = ({ sheetName, name, taskMovement, sheetHandlers, activeList }) 
    const listHandlers = {
       updateTask: task => {
          const taskscp = [...tasks]
-         let td = taskscp.find(td => td.id === task.id)
-         td = task
+         let taskIdxToReplace = taskscp.findIndex(td => td.id === task.id)
+         taskscp[taskIdxToReplace] = task
          setTasks(taskscp)
       },
       addTask: (
@@ -76,18 +88,18 @@ const TaskList = ({ sheetName, name, taskMovement, sheetHandlers, activeList }) 
 
          if (aboveId) {
             let taskscp = [...tasks]
-            const aboveTaskIdx = taskscp.findIndex(t => t.id == aboveId)
+            const aboveTaskIdx = taskscp.findIndex(t => t.id === aboveId)
             taskscp.splice(aboveTaskIdx + 1, 0, newTask)
             setTasks(taskscp)
          } else {
             setTasks(prevTasks => [...prevTasks, newTask])
          }
       },
-      isLastTask: id => tasks.findIndex(t => t.id == id) == tasks.length - 1,
+      isLastTask: id => tasks.findIndex(t => t.id === id) === tasks.length - 1,
       moveUp: id => {
          const taskscp = [...tasks]
-         const currentIndex = taskscp.findIndex(t => t.id == id)
-         const currentTask = taskscp.find(t => t.id == id)
+         const currentIndex = taskscp.findIndex(t => t.id === id)
+         const currentTask = taskscp.find(t => t.id === id)
          currentTask.focus = true
          taskscp[currentIndex] = taskscp[currentIndex - 1]
          taskscp[currentIndex - 1] = currentTask
@@ -95,8 +107,8 @@ const TaskList = ({ sheetName, name, taskMovement, sheetHandlers, activeList }) 
       },
       moveDown: id => {
          const taskscp = [...tasks]
-         const currentIndex = taskscp.findIndex(t => t.id == id)
-         const currentTask = taskscp.find(t => t.id == id)
+         const currentIndex = taskscp.findIndex(t => t.id === id)
+         const currentTask = taskscp.find(t => t.id === id)
          currentTask.focus = true
          taskscp[currentIndex] = taskscp[currentIndex + 1]
          taskscp[currentIndex + 1] = currentTask
@@ -104,7 +116,7 @@ const TaskList = ({ sheetName, name, taskMovement, sheetHandlers, activeList }) 
       },
       focusOn: id => {
          const taskscp = [...tasks]
-         const focusedTD = taskscp.find(t => t.focus == true)
+         const focusedTD = taskscp.find(t => t.focus === true)
          if (focusedTD) focusedTD.focus = false
          taskscp.find(td => td.id === id).focus = true
          setTasks(taskscp)
@@ -142,21 +154,21 @@ const TaskList = ({ sheetName, name, taskMovement, sheetHandlers, activeList }) 
       deleteTask: id => {
          sheetHandlers.add(
             'deleted',
-            tasks.find(task => task.id == id)
+            tasks.find(task => task.id === id)
          )
          remove(id)
       },
       postpone: id => {
          sheetHandlers.add(
             'backlog',
-            tasks.find(task => task.id == id)
+            tasks.find(task => task.id === id)
          )
          remove(id)
       },
       promote: id => {
          sheetHandlers.add(
             'todos',
-            tasks.find(task => task.id == id)
+            tasks.find(task => task.id === id)
          )
          remove(id)
       },

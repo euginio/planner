@@ -1,5 +1,4 @@
-import { useEffect } from 'react'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { DEBUGG_MODE } from './App'
 import TaskList from './TaskList'
 
@@ -25,6 +24,7 @@ function Sheet({ name }) {
          }
       }
    }
+
    return (
       <div onKeyDown={handleKeyDown}>
          <h2>Sheet {name}</h2>

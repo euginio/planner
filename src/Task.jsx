@@ -50,7 +50,7 @@ const Task = ({ task, listHandlers }) => {
 
    const handleInputKeyDown = e => {
       //['ctrlKey', 'shiftKey', 'altKey', 'metaKey']
-      const updateKeys = ['Enter', 'ArrowUp', 'ArrowDown']
+      // const updateKeys = ['Enter', 'ArrowUp', 'ArrowDown']
 
       if (e.key === 'Enter') {
          if (e.altKey) {

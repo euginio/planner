@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import IsolatedSheet from './IsolatedSheet'
+import Sheet from './Sheet'
 export const DEBUGG_MODE = false
 
 function App() {
@@ -62,7 +62,7 @@ function App() {
                </li>
             )}
          </ul>
-         {currentSheet && <IsolatedSheet name={currentSheet}></IsolatedSheet>}
+         {currentSheet && <Sheet name={currentSheet}></Sheet>}
       </>
    )
 }

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import Task from './Task'
+import OldTask from './OldTask'
 import TaskInfo from './TaskInfo'
 
-const TaskList = ({ sheetName, name, taskMovement, sheetHandlers, activeList }) => {
+const OldTaskList = ({ sheetName, name, taskMovement, sheetHandlers, activeList }) => {
    const LS_TASKS_KEY = sheetName + '.' + name
    const [tasks, setTasks] = useState([])
 
@@ -186,7 +186,7 @@ const TaskList = ({ sheetName, name, taskMovement, sheetHandlers, activeList }) 
          <h3>{name}</h3>
          <ul>
             {tasks.map(t => (
-               <Task key={t.id} task={t} listHandlers={listHandlers}></Task>
+               <OldTask key={t.id} task={t} listHandlers={listHandlers}></OldTask>
             ))}
          </ul>
          <button onClick={clearCompleted}>Clear complete</button>
@@ -194,4 +194,4 @@ const TaskList = ({ sheetName, name, taskMovement, sheetHandlers, activeList }) 
    )
 }
 
-export default TaskList
+export default OldTaskList

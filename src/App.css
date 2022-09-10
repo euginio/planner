@@ -47,15 +47,19 @@ ul.sheetList {
    border-right: 0;
    margin-top: 5px;
 }
+.taskHolder.showSize{
+   border-left: groove;
+}
+
 .taskHolder[size='2']{
    height: 40px;
-   border-left: groove;
 }
 .taskHolder[size='3']{
    height: 60px;
-   border-left: groove;
 }
 .taskHolder[size='4']{
    height: 80px;
-   border-left: groove;
+}
+.taskHolder[size='5']{
+   height: 100px;
 }

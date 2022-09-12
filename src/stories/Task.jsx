@@ -1,21 +1,26 @@
-import React, { useEffect, useRef, useState } from 'react'
-import './App.css'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import './Task.css'
 
 const Task = ({
-   focus,
-   initialData = { text: '', done: false, size: 1, relevance: 1 },
+   editable = true,
+   text = '',
+   done = false,
+   size = 1,
+   relevance = 1,
    saveHandler,
 }) => {
-   const [task, setTask] = useState(initialData)
+   const [task, setTask] = useState({ editable, text, done, size, relevance })
    const taskInputRef = useRef()
 
    useEffect(() => {
       if (taskInputRef && taskInputRef.current) taskInputRef.current.focus()
-   }, [focus])
+   }, [editable])
+
+   const taskChanged = useCallback(task => saveHandler(task), [saveHandler])
 
    useEffect(() => {
-      saveHandler(task)
-   }, [task])
+      taskChanged(task)
+   }, [task, taskChanged])
 
    // const moveUp = () => listHandlers.moveUp(task.id)
    // const moveDown = () => listHandlers.moveDown(task.id)
@@ -61,7 +66,7 @@ const Task = ({
    return (
       <>
          <div className={`taskHolder ${task.size > 1 && 'showSize'}`} size={task.size}>
-            {focus ? (
+            {editable ? (
                <input
                   ref={taskInputRef}
                   onKeyDown={handleInputKeyDown}

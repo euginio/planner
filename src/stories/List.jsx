@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Task from './Task'
+
 import TaskInfo from './TaskInfo'
 
 const List = ({ sheetName, name }) => {
@@ -181,8 +182,8 @@ const List = ({ sheetName, name }) => {
             {list.map(t => (
                <li onKeyDown={e => handleInputKeyDown(e, t.id)} key={t.id}>
                   <Task
-                     focus={t.focus}
-                     initialData={t.data}
+                     editable={t.focus}
+                     {...t.data}
                      saveHandler={task => saveItem(task, t.id)}
                   ></Task>
                </li>

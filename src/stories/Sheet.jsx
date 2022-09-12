@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { DEBUGG_MODE } from './App'
+// import { useState } from 'react'
+// import { DEBUGG_MODE } from './App'
 import List from './List'
+import './Sheet.css'
 
 function Sheet({ name }) {
    // const listNames = ['todos', 'backlog', 'done', 'deleted']

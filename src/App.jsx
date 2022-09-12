@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import Sheet from './Sheet'
+import Sheet from './stories/Sheet'
 export const DEBUGG_MODE = false
 
 function App() {

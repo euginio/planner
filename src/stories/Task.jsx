@@ -1,45 +1,36 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import classNames from 'classnames'
+import React, { useEffect, useRef } from 'react'
 import './Task.css'
 
 const Task = ({
+   id,
    editable = true,
    text = '',
    done = false,
    size = 1,
    relevance = 1,
-   saveHandler,
+   handlers,
 }) => {
-   const [task, setTask] = useState({ editable, text, done, size, relevance })
    const taskInputRef = useRef()
 
    useEffect(() => {
       if (taskInputRef && taskInputRef.current) taskInputRef.current.focus()
    }, [editable])
 
-   const taskChanged = useCallback(task => saveHandler(task), [saveHandler])
-
-   useEffect(() => {
-      taskChanged(task)
-   }, [task, taskChanged])
-
-   // const moveUp = () => listHandlers.moveUp(task.id)
-   // const moveDown = () => listHandlers.moveDown(task.id)
-   // const updateTask = () => listHandlers.updateTask(task)
-
    const increaseSize = () => {
-      setTask({ ...task, size: task.size + 1 })
+      handlers.setSize(id, size + 1)
    }
 
    const decreaseSize = () => {
-      if (task.size > 1) setTask({ ...task, size: task.size - 1 })
+      if (size > 1) handlers.setSize(id, size - 1)
    }
 
    const updateText = () => {
-      setTask({ ...task, text: taskInputRef.current.value.trim() })
+      if (taskInputRef.current.value) handlers.setText(id, taskInputRef.current.value)
    }
 
    const swipeDone = () => {
-      setTask({ ...task, done: !task.done })
+      handlers.setDone(id, !done)
    }
 
    const handleInputKeyDown = e => {
@@ -48,33 +39,38 @@ const Task = ({
       if (e.key === 'Enter') {
          if (e.altKey) {
             swipeDone()
+            e.stopPropagation()
          }
       }
       if (e.key === 'ArrowUp') {
          if (e.ctrlKey) {
             increaseSize()
             e.preventDefault()
+            e.stopPropagation()
          }
       }
       if (e.key === 'ArrowDown') {
          if (e.ctrlKey) {
             decreaseSize()
             e.preventDefault()
+            e.stopPropagation()
          }
       }
    }
+
    return (
       <>
-         <div className={`taskHolder ${task.size > 1 && 'showSize'}`} size={task.size}>
+         <div className={classNames('taskHolder', { showSize: size > 1 })} size={size}>
             {editable ? (
                <input
                   ref={taskInputRef}
                   onKeyDown={handleInputKeyDown}
                   onChange={updateText}
-                  className={`taskInput labeledInput ${task.done && 'crossOut'}`}
+                  value={text}
+                  className={classNames('taskInput', 'labeledInput', { crossOut: done })}
                />
             ) : (
-               <label className={`taskLabel ${task.done && 'crossOut'}`}>{task.text || '_'}</label>
+               <label className={classNames('taskLabel', { crossOut: done })}>{text || '_'}</label>
             )}
          </div>
       </>

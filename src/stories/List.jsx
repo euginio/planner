@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import Task from './Task'
-
-import TaskInfo from './TaskInfo'
+import DummyList from './DummyList'
+import NavigableList from './NavigableList'
 
 const List = ({ sheetName, name }) => {
    const [list, setList] = useState([])
@@ -21,27 +20,19 @@ const List = ({ sheetName, name }) => {
       if (list.length) localStorage.setItem(LS_LIST_KEY, JSON.stringify(list))
    }, [list, LS_LIST_KEY])
 
-   // const listHandlers = {
-   //    postpone: id => {
-   //       sheetHandlers.add(
-   //          'backlog',
-   //          list.find(task => task.id === id)
-   //       )
-   //       remove(id)
-   //    },
-   //    promote: id => {
-   //       sheetHandlers.add(
-   //          'todos',
-   //          list.find(task => task.id === id)
-   //       )
-   //       remove(id)
-   //    },
+   // const postpone = id => {
+   //    sheetHandlers.add(
+   //       'backlog',
+   //       list.find(task => task.id === id)
+   //    )
+   //    remove(id)
    // }
-
-   // const clearCompleted = () => {
-   //    list.filter(t => t.done).forEach(t => sheetHandlers.add('done', t))
-   //    const newlist = list.filter(t => !t.done)
-   //    setList(newlist)
+   // const promote = id => {
+   //    sheetHandlers.add(
+   //       'todos',
+   //       list.find(task => task.id === id)
+   //    )
+   //    remove(id)
    // }
 
    const deleteTask = id => {
@@ -76,7 +67,6 @@ const List = ({ sheetName, name }) => {
 
    const handleInputKeyDown = (e, id) => {
       if (e.key === 'Enter') {
-         quitFocus(id)
          addTask(id)
       }
       if (e.key === 'ArrowUp') {
@@ -112,6 +102,19 @@ const List = ({ sheetName, name }) => {
          deleteTask(id)
          e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
       }
+
+      // if (e.altKey) {
+      //    if (e.key === 'ArrowRight') {
+      //       postpone()
+      //       e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
+      //    }
+      // }
+      // if (e.altKey) {
+      //    if (e.key === 'ArrowLeft') {
+      //       promote()
+      //       e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
+      //    }
+      // }
    }
 
    const addTask = aboveId => {
@@ -128,43 +131,28 @@ const List = ({ sheetName, name }) => {
       }
    }
 
+   const setItemAttr = (id, attr, value) => {
+      let listcp = [...list]
+      listcp.find(i => i.id === id)[attr] = value
+      setList(listcp)
+   }
+
    const listHandler = {
-      setSize: (id, value) => {
-         let listcp = [...list]
-         listcp.find(i => i.id === id).size = value
-         setList(listcp)
-      },
-      setText: (id, value) => {
-         let listcp = [...list]
-         listcp.find(i => i.id === id).text = value
-         setList(listcp)
-      },
-
-      setDone: (id, value) => {
-         let listcp = [...list]
-         listcp.find(i => i.id === id).done = value
-         setList(listcp)
-      },
+      setSize: (id, value) => setItemAttr(id, 'size', value),
+      setText: (id, value) => setItemAttr(id, 'text', value),
+      setDone: (id, value) => setItemAttr(id, 'done', value),
    }
 
-   const moveUp = id => {
+   const move = (id, positions) => {
       const listcp = [...list]
       const currentIndex = listcp.findIndex(t => t.id === id)
       const currentTask = listcp.find(t => t.id === id)
-      currentTask.focus = true
-      listcp[currentIndex] = listcp[currentIndex - 1]
-      listcp[currentIndex - 1] = currentTask
+      listcp[currentIndex] = listcp[currentIndex + positions]
+      listcp[currentIndex + positions] = currentTask
       setList(listcp)
    }
-   const moveDown = id => {
-      const listcp = [...list]
-      const currentIndex = listcp.findIndex(t => t.id === id)
-      const currentTask = listcp.find(t => t.id === id)
-      currentTask.focus = true
-      listcp[currentIndex] = listcp[currentIndex + 1]
-      listcp[currentIndex + 1] = currentTask
-      setList(listcp)
-   }
+   const moveUp = id => move(id, -1)
+   const moveDown = id => move(id, 1)
 
    const focusUp = id => changeFocus(id, -1, tdIdx => tdIdx > 0)
 
@@ -181,24 +169,13 @@ const List = ({ sheetName, name }) => {
       listcp.find(i => i.id === id).focus = true
       setList(listcp)
    }
-   const handleOnClick = id => focusOn(id)
+   const handleOnItemClick = id => focusOn(id)
 
    return (
       <>
-         <TaskInfo tasks={list}></TaskInfo>
-         <h3>{name}</h3>
-         <ul>
-            {list.map(t => (
-               <li
-                  onKeyDown={e => handleInputKeyDown(e, t.id)}
-                  key={t.id}
-                  onClick={() => handleOnClick(t.id)}
-               >
-                  <Task editable={t.focus} {...t} handlers={listHandler}></Task>
-               </li>
-            ))}
-         </ul>
-         {/* <button onClick={clearCompleted}>Clear complete</button> */}
+         <NavigableList
+            {...{ list, name, handleInputKeyDown, handleOnItemClick, listHandler }}
+         ></NavigableList>
       </>
    )
 }

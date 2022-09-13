@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import DummyList from './DummyList'
 import NavigableList from './NavigableList'
 
 const List = ({ sheetName, name }) => {
@@ -20,6 +19,11 @@ const List = ({ sheetName, name }) => {
       if (list.length) localStorage.setItem(LS_LIST_KEY, JSON.stringify(list))
    }, [list, LS_LIST_KEY])
 
+   //    const clearCompleted = (list) => {
+   //       list.filter(t => t.done).forEach(t => sheetHandlers.add('done', t))
+   //       const newlist = list.filter(t => !t.done)
+   //       setList(newlist)
+   //    }
    // const postpone = id => {
    //    sheetHandlers.add(
    //       'backlog',
@@ -35,100 +39,18 @@ const List = ({ sheetName, name }) => {
    //    remove(id)
    // }
 
-   const deleteTask = id => {
-      // sheetHandlers.add(
-      //    'deleted',
-      //    list.find(task => task.id === id)
-      // )
-      remove(id)
-   }
-
-   const remove = id => {
-      if (isLastTask(id)) {
-         focusUp(id)
-      } else {
-         focusDown(id)
-      }
-      const listcp = [...list]
-      const updatedlist = listcp.filter(task => task.id !== id)
-      setList(updatedlist)
-   }
-
-   const isLastTask = id => list.findIndex(t => t.id === id) === list.length - 1
-
-   const focusOnFirst = () => focusOn(list[0].id)
-   const focusOnLast = () => focusOn(list[list.length - 1].id)
-
-   const quitFocus = id => {
-      let listcp = [...list]
-      listcp.find(t => t.id === id).focus = false
-      setList(listcp)
-   }
-
-   const handleInputKeyDown = (e, id) => {
-      if (e.key === 'Enter') {
-         addTask(id)
-      }
-      if (e.key === 'ArrowUp') {
-         if (e.altKey) {
-            moveUp(id)
-         } else {
-            // e.stopPropagation()
-            focusUp(id)
-         }
-         e.preventDefault() // prevents put prompt at begining
-      }
-      if (e.key === 'ArrowDown') {
-         if (e.altKey) {
-            moveDown(id)
-         } else {
-            focusDown(id)
-         }
-      }
-      if (e.ctrlKey) {
-         if (e.key === 'End') {
-            focusOnLast(id)
-            e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
-         }
-         if (e.key === 'Home') {
-            focusOnFirst(id)
-            e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
-         }
-      }
-      if (
-         (e.key === 'Backspace' || e.key === 'Delete') &&
-         (e.altKey || !list.find(i => i.id === id).text)
-      ) {
-         deleteTask(id)
-         e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
-      }
-
+   const handleInputKeyDown = e => {
+      const id = list.find(i => i.focus).id
       // if (e.altKey) {
       //    if (e.key === 'ArrowRight') {
       //       postpone()
       //       e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
       //    }
-      // }
-      // if (e.altKey) {
       //    if (e.key === 'ArrowLeft') {
       //       promote()
       //       e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
       //    }
       // }
-   }
-
-   const addTask = aboveId => {
-      const maxTaskId = list.length ? Math.max(...list.map(t => t.id)) : 0
-      let newTask = { id: maxTaskId + 1, focus: true }
-
-      if (aboveId) {
-         let listcp = [...list]
-         const aboveTaskIdx = listcp.findIndex(t => t.id === aboveId)
-         listcp.splice(aboveTaskIdx + 1, 0, newTask)
-         setList(listcp)
-      } else {
-         setList(prevlist => [...prevlist, newTask])
-      }
    }
 
    const setItemAttr = (id, attr, value) => {
@@ -137,30 +59,71 @@ const List = ({ sheetName, name }) => {
       setList(listcp)
    }
 
-   const listHandler = {
+   const itemHandlers = {
       setSize: (id, value) => setItemAttr(id, 'size', value),
       setText: (id, value) => setItemAttr(id, 'text', value),
       setDone: (id, value) => setItemAttr(id, 'done', value),
    }
 
+   const navigableHandlers = {
+      addTask: aboveId => {
+         const maxTaskId = list.length ? Math.max(...list.map(t => t.id)) : 0
+         let newTask = { id: maxTaskId + 1, focus: true }
+         if (aboveId) {
+            let listcp = [...list]
+            const aboveTaskIdx = listcp.findIndex(t => t.id === aboveId)
+            listcp.splice(aboveTaskIdx + 1, 0, newTask)
+            setList(listcp)
+         } else {
+            setList(prevlist => [...prevlist, newTask])
+         }
+      },
+      moveUp: id => move(id, -1),
+      moveDown: id => move(id, 1),
+
+      deleteItem: id => {
+         // sheetHandlers.add(
+         //    'deleted',
+         //    list.find(task => task.id === id)
+         // )
+         remove(id)
+      },
+      focusOnFirst: () => focusOn(list[0].id),
+      focusOnLast: () => focusOn(list[list.length - 1].id),
+
+      focusUp: id => slideFocus(id, -1),
+      focusDown: id => slideFocus(id, 1),
+   }
+
    const move = (id, positions) => {
       const listcp = [...list]
       const currentIndex = listcp.findIndex(t => t.id === id)
-      const currentTask = listcp.find(t => t.id === id)
-      listcp[currentIndex] = listcp[currentIndex + positions]
-      listcp[currentIndex + positions] = currentTask
-      setList(listcp)
+      if (listcp[currentIndex + positions]) {
+         const currentItem = listcp.find(t => t.id === id)
+         listcp[currentIndex] = listcp[currentIndex + positions]
+         listcp[currentIndex + positions] = currentItem
+         setList(listcp)
+      }
    }
-   const moveUp = id => move(id, -1)
-   const moveDown = id => move(id, 1)
+   const isLastItem = id => list.findIndex(t => t.id === id) === list.length - 1
+   const remove = id => {
+      if (isLastItem(id)) {
+         navigableHandlers.focusUp(id)
+      } else {
+         navigableHandlers.focusDown(id)
+      }
+      const listcp = [...list]
+      const updatedlist = listcp.filter(i => i.id !== id)
+      setList(updatedlist)
+   }
 
-   const focusUp = id => changeFocus(id, -1, tdIdx => tdIdx > 0)
-
-   const focusDown = id => changeFocus(id, 1, tdIdx => tdIdx < list.length - 1)
-
-   const changeFocus = (id, addingValue, condition) => {
+   const slideFocus = (id, positions) => {
       const tdIdx = list.findIndex(td => td.id === id)
-      if (condition(tdIdx)) focusOn(list[tdIdx + addingValue].id)
+      if (
+         (positions < 0 && tdIdx + positions >= 0) ||
+         (positions > 0 && tdIdx + positions < list.length)
+      )
+         focusOn(list[tdIdx + positions].id)
    }
 
    const focusOn = id => {
@@ -172,11 +135,19 @@ const List = ({ sheetName, name }) => {
    const handleOnItemClick = id => focusOn(id)
 
    return (
-      <>
+      <div onKeyDown={e => handleInputKeyDown(e)}>
          <NavigableList
-            {...{ list, name, handleInputKeyDown, handleOnItemClick, listHandler }}
+            {...{
+               list,
+               name,
+               navigableHandlers,
+               handleInputKeyDown,
+               handleOnItemClick,
+               itemHandlers,
+            }}
          ></NavigableList>
-      </>
+         {/* <button onClick={list => clearCompleted(list)}>Clear complete</button> */}
+      </div>
    )
 }
 

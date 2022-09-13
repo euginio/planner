@@ -4,7 +4,7 @@ import List from './List'
 import './Sheet.css'
 
 function Sheet({ name }) {
-   // const listNames = ['todos', 'backlog', 'done', 'deleted']
+   const listNames = ['todos', 'backlog', 'done', 'deleted']
    // const [taskMovement, setTaskMovement] = useState({})
    // const [activeList, setActiveList] = useState(listNames[0])
 
@@ -30,6 +30,9 @@ function Sheet({ name }) {
       <>
          <h2>Sheet {name}</h2>
          <List sheetName={name} name='todos'></List>
+         <List sheetName={name} name='backlog'></List>
+         <List sheetName={name} name='done'></List>
+         <List sheetName={name} name='deleted'></List>
       </>
    )
 }

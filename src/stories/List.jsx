@@ -63,6 +63,7 @@ const List = ({ sheetName, name }) => {
       setSize: (id, value) => setItemAttr(id, 'size', value),
       setText: (id, value) => setItemAttr(id, 'text', value),
       setDone: (id, value) => setItemAttr(id, 'done', value),
+      handleOnItemClick: id => focusOn(id),
    }
 
    const navigableHandlers = {
@@ -132,7 +133,6 @@ const List = ({ sheetName, name }) => {
       listcp.find(i => i.id === id).focus = true
       setList(listcp)
    }
-   const handleOnItemClick = id => focusOn(id)
 
    return (
       <div onKeyDown={e => handleInputKeyDown(e)}>
@@ -141,8 +141,6 @@ const List = ({ sheetName, name }) => {
                list,
                name,
                navigableHandlers,
-               handleInputKeyDown,
-               handleOnItemClick,
                itemHandlers,
             }}
          ></NavigableList>

@@ -60,7 +60,11 @@ const Task = ({
 
    return (
       <>
-         <div className={classNames('taskHolder', { showSize: size > 1 })} size={size}>
+         <li
+            className={classNames('taskHolder', { showSize: size > 1 })}
+            size={size}
+            onClick={() => handlers.handleOnItemClick(id)}
+         >
             {editable ? (
                <input
                   ref={taskInputRef}
@@ -72,7 +76,7 @@ const Task = ({
             ) : (
                <label className={classNames('taskLabel', { crossOut: done })}>{text || '_'}</label>
             )}
-         </div>
+         </li>
       </>
    )
 }

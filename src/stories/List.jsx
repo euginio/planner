@@ -38,7 +38,7 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
             let id = null
             if (taskMovement.position === -1) id = list[list.length - 1].id
             if (taskMovement.position > 0) id = list[taskMovement.position].id
-            addTask(id, t)
+            addTask(id, 1, t)
          })
          sheetHandlers.taskMoved()
       }
@@ -46,7 +46,7 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
 
    // clearCompletedTo, removeTo, postponeTo, promoteTo
    const handleInputKeyDown = e => {
-      const id = list.find(i => i.focus).id
+      const id = list.find(i => i.focus)?.id || list[0].id
       if (
          listMovements.removeTo &&
          (e.key === 'Backspace' || e.key === 'Delete') &&
@@ -91,7 +91,7 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
       },
    }
 
-   const addTask = (aboveId, taskToAdd) => {
+   const addTask = (aboveId, positions = 1, taskToAdd) => {
       setList(prevlist => {
          const maxTaskId = prevlist.length ? Math.max(...prevlist.map(t => t.id)) : 0
          let newTask = taskToAdd ? taskToAdd : defaultNewTask
@@ -100,7 +100,7 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
          if (aboveId) {
             listcp.find(t => t.id === aboveId).focus = false
             const aboveTaskIdx = listcp.findIndex(t => t.id === aboveId)
-            listcp.splice(aboveTaskIdx + 1, 0, newTask)
+            listcp.splice(aboveTaskIdx + positions, 0, newTask)
          } else {
             listcp.unshift(newTask)
          }
@@ -109,7 +109,7 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
    }
 
    const navigableHandlers = {
-      addTask: aboveId => addTask(aboveId),
+      addTask: (aboveId, positions) => addTask(aboveId, positions),
       moveUp: id => move(id, -1),
       moveDown: id => move(id, 1),
       focusOnFirst: () => {

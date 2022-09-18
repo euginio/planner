@@ -5,7 +5,7 @@ const NavigableList = ({ navigableHandlers, itemActions, list, ...params }) => {
       if (itemActions) {
          const id = list.find(i => i.focus).id
          if (e.key === 'Enter' && itemActions.add) {
-            navigableHandlers.addTask(id)
+            navigableHandlers.addTask(id, e.target.selectionStart ? 1 : 0)
          }
          if (itemActions) {
             if (e.key === 'ArrowUp') {

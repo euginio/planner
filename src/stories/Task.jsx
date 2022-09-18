@@ -4,19 +4,19 @@ import './Task.css'
 
 const Task = ({
    id,
-   editable = true,
+   focus = true,
    text = '',
    done = false,
    size = 1,
    relevance = 1,
    handlers,
-   itemActions,
+   allowedActions,
 }) => {
    const taskInputRef = useRef()
 
    useEffect(() => {
-      if (taskInputRef && taskInputRef.current) taskInputRef.current.focus()
-   }, [editable])
+      if (focus && allowedActions?.editable && taskInputRef?.current) taskInputRef.current.focus()
+   }, [focus, allowedActions])
 
    const increaseSize = () => handlers.setSize(id, size + 1)
    const decreaseSize = () => {
@@ -31,12 +31,12 @@ const Task = ({
       //['ctrlKey', 'shiftKey', 'altKey', 'metaKey']
 
       if (e.key === 'Enter') {
-         if (e.altKey && itemActions.completable) {
+         if (e.altKey && allowedActions.completable) {
             swipeDone()
             e.stopPropagation()
          }
       }
-      if (e.ctrlKey && itemActions.sizeable) {
+      if (e.ctrlKey && allowedActions.sizeable) {
          if (e.key === 'ArrowUp') {
             increaseSize()
             e.preventDefault()
@@ -56,11 +56,12 @@ const Task = ({
             className={classNames('taskHolder', { showSize: size > 1 })}
             size={size}
             onClick={() => handlers.handleOnItemClick(id)}
+            onKeyDown={handleInputKeyDown}
          >
-            {editable ? (
+            {focus ? (
                <input
                   ref={taskInputRef}
-                  onKeyDown={handleInputKeyDown}
+                  readOnly={!allowedActions?.editable}
                   onChange={updateText}
                   value={text}
                   className={classNames('taskInput', 'labeledInput', { crossOut: done })}

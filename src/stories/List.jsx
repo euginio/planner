@@ -29,7 +29,7 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
    useEffect(() => {
       if (taskMovement?.targetTaskList === name) {
          //is a new task for me, adding it...
-         addTask(null, taskMovement.taskToMove)
+         taskMovement.tasksToMove.forEach(t => addTask(null, t))
          sheetHandlers.taskMoved()
       }
    }, [taskMovement, name])
@@ -79,17 +79,19 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
    }
 
    const addTask = (aboveId, taskToAdd) => {
-      const maxTaskId = list.length ? Math.max(...list.map(t => t.id)) : 0
-      let newTask = taskToAdd ? taskToAdd : { focus: true }
-      newTask = { ...newTask, id: maxTaskId + 1 }
-      if (aboveId) {
-         let listcp = [...list]
-         const aboveTaskIdx = listcp.findIndex(t => t.id === aboveId)
-         listcp.splice(aboveTaskIdx + 1, 0, newTask)
-         setList(listcp)
-      } else {
-         setList(prevlist => [...prevlist, newTask])
-      }
+      setList(prevlist => {
+         const maxTaskId = prevlist.length ? Math.max(...prevlist.map(t => t.id)) : 0
+         let newTask = taskToAdd ? taskToAdd : { focus: true }
+         newTask = { ...newTask, id: maxTaskId + 1 }
+         let listcp = [...prevlist]
+         if (aboveId) {
+            const aboveTaskIdx = listcp.findIndex(t => t.id === aboveId)
+            listcp.splice(aboveTaskIdx + 1, 0, newTask)
+         } else {
+            listcp.push(newTask)
+         }
+         return listcp
+      })
    }
 
    const navigableHandlers = {
@@ -106,15 +108,21 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
       focusDown: id => slideFocus(id, 1),
    }
 
-   const deleteItem = id => migrateToList(id, listMovements.removeTo)
-   const postpone = id => migrateToList(id, listMovements.postponeTo)
-   const promote = id => migrateToList(id, listMovements.promoteTo)
+   const deleteItem = id => migrateToListById(id, listMovements.removeTo)
+   const postpone = id => migrateToListById(id, listMovements.postponeTo)
+   const promote = id => migrateToListById(id, listMovements.promoteTo)
 
-   const migrateToList = (id, targetList) => {
+   const clearCompleted = () => {
       sheetHandlers.add(
-         list.find(task => task.id === id),
-         targetList
+         list.filter(t => t.done),
+         listMovements.clearCompletedTo
       )
+      const listcp = [...list.filter(t => !t.done)]
+      setList(listcp)
+   }
+
+   const migrateToListById = (id, targetList) => {
+      sheetHandlers.add([list.find(task => task.id === id)], targetList)
       remove(id)
    }
 
@@ -165,6 +173,9 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
             itemHandlers={itemHandlers}
             itemActions={listConfig.itemsNavigation}
          ></NavigableList>
+         {listConfig.listMovements.clearCompletedTo && (
+            <button onClick={clearCompleted}>Clear complete</button>
+         )}
       </div>
    )
 }

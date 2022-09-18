@@ -40,7 +40,7 @@ const NavigableList = ({ navigableHandlers, itemActions, list, ...params }) => {
 
    return (
       <div onKeyDown={e => handleNavigableInputKeyDown(e)}>
-         <DummyList list={list} {...params} itemActions={itemActions}></DummyList>
+         <DummyList list={list} {...params} allowedActions={itemActions}></DummyList>
       </div>
    )
 }

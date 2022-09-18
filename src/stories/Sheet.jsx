@@ -54,7 +54,7 @@ function Sheet({ name }) {
          },
       },
       done: {
-         listMovements: { clearCompletedTo: 'done' },
+         listMovements: {},
          itemsNavigation: {
             completable: true,
             sizeable: true,
@@ -69,8 +69,7 @@ function Sheet({ name }) {
 
    const sheetHandlers = {
       taskMoved: () => setTaskMovement({}),
-      add: (task, listName) =>
-         setTaskMovement({ targetTaskList: listName, taskToMove: { ...task, focus: false } }),
+      add: (items, listName) => setTaskMovement({ targetTaskList: listName, tasksToMove: items }),
       // focusedOnMe: taskListName => setTaskMovement(taskListName),
    }
 
@@ -93,7 +92,6 @@ function Sheet({ name }) {
                key={listName}
                name={listName}
                sheetName={name}
-               // clearCompletedTo={clearCompletedTo}
                listConfig={listsConf[listName]}
                sheetHandlers={sheetHandlers}
                taskMovement={taskMovement}

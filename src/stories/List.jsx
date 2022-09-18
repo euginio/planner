@@ -1,23 +1,26 @@
 import { useEffect, useMemo, useState } from 'react'
 import NavigableList from './NavigableList'
 
-const List = ({ sheetName, name }) => {
+const List = ({ focus, sheetName, name }) => {
    const [list, setList] = useState([])
    const LS_LIST_KEY = useMemo(() => sheetName + '.' + name, [sheetName, name])
 
    useEffect(() => {
       let loadedList = JSON.parse(localStorage.getItem(LS_LIST_KEY))
-      if (loadedList) {
-         loadedList[loadedList.length - 1].focus = true
-      } else {
+      if (!loadedList)
          loadedList = [{ id: 1, focus: true, text: '', done: false, size: 1, relevance: 1 }]
-      }
+
       setList(loadedList)
    }, [LS_LIST_KEY])
 
    useEffect(() => {
       if (list.length) localStorage.setItem(LS_LIST_KEY, JSON.stringify(list))
    }, [list, LS_LIST_KEY])
+
+   useEffect(() => {
+      if (!focus) unFocusAll()
+      // else if (list.length) navigableHandlers.focusOnLast()
+   }, [focus, list.length])
 
    //    const clearCompleted = (list) => {
    //       list.filter(t => t.done).forEach(t => sheetHandlers.add('done', t))
@@ -51,6 +54,12 @@ const List = ({ sheetName, name }) => {
       //       e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
       //    }
       // }
+   }
+
+   const unFocusAll = () => {
+      let listcp = [...list]
+      listcp.forEach(i => (i.focus = false))
+      setList(listcp)
    }
 
    const setItemAttr = (id, attr, value) => {

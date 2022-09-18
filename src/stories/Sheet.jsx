@@ -29,10 +29,10 @@ function Sheet({ name }) {
    return (
       <>
          <h2>Sheet {name}</h2>
-         <List sheetName={name} name='todos'></List>
-         <List sheetName={name} name='backlog'></List>
-         <List sheetName={name} name='done'></List>
-         <List sheetName={name} name='deleted'></List>
+         <List focus={true} key='todos' sheetName={name} name='todos'></List>
+         <List key='backlog' sheetName={name} name='backlog'></List>
+         <List key='done' sheetName={name} name='done'></List>
+         <List key='deleted' sheetName={name} name='deleted'></List>
       </>
    )
 }

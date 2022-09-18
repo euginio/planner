@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import NavigableList from './NavigableList'
 
 // @param {itemActions} determines the posible actions for this list (add, editable, navigable, completable, sizeable, sortable)
-const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActive }) => {
+const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActive, activate }) => {
    const [list, setList] = useState([])
 
    const LS_LIST_KEY = useMemo(() => sheetName + '.' + name, [sheetName, name])
@@ -23,13 +23,21 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
 
    useEffect(() => {
       if (!isActive) unFocusAll()
-      else navigableHandlers.focusOnFirst()
+      else {
+         if (!list.find(i => i.focus === true)) navigableHandlers.focusOnFirst()
+      }
    }, [isActive])
 
    useEffect(() => {
       if (taskMovement?.targetTaskList === name) {
          //is a new task for me, adding it...
-         taskMovement.tasksToMove.forEach(t => addTask(null, t))
+         taskMovement.tasksToMove.forEach(t => {
+            // taskMovement.position: -1 = last; 0 = first; other = that position
+            let id = null
+            if (taskMovement.position === -1) id = list[list.length - 1].id
+            if (taskMovement.position > 0) id = list[taskMovement.position].id
+            addTask(id, t)
+         })
          sheetHandlers.taskMoved()
       }
    }, [taskMovement, name])
@@ -75,7 +83,10 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
       setSize: (id, value) => setItemAttr(id, 'size', value),
       setText: (id, value) => setItemAttr(id, 'text', value),
       setDone: (id, value) => setItemAttr(id, 'done', value),
-      handleOnItemClick: id => focusOn(id),
+      handleOnItemClick: id => {
+         focusOn(id)
+         activate(name)
+      },
    }
 
    const addTask = (aboveId, taskToAdd) => {
@@ -85,10 +96,11 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
          newTask = { ...newTask, id: maxTaskId + 1 }
          let listcp = [...prevlist]
          if (aboveId) {
+            listcp.find(t => t.id === aboveId).focus = false
             const aboveTaskIdx = listcp.findIndex(t => t.id === aboveId)
             listcp.splice(aboveTaskIdx + 1, 0, newTask)
          } else {
-            listcp.push(newTask)
+            listcp.unshift(newTask)
          }
          return listcp
       })
@@ -108,9 +120,15 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
       focusDown: id => slideFocus(id, 1),
    }
 
-   const deleteItem = id => migrateToListById(id, listMovements.removeTo)
-   const postpone = id => migrateToListById(id, listMovements.postponeTo)
-   const promote = id => migrateToListById(id, listMovements.promoteTo)
+   const deleteItem = id => migrateToListById(id, listMovements.removeTo, 0)
+   const postpone = id => migrateToListById(id, listMovements.postponeTo, 0)
+   const promote = id => migrateToListById(id, listMovements.promoteTo, -1)
+
+   const migrateToListById = (id, targetList, position) => {
+      if (!targetList) return
+      sheetHandlers.add([list.find(task => task.id === id)], targetList, position)
+      remove(id)
+   }
 
    const clearCompleted = () => {
       sheetHandlers.add(
@@ -121,24 +139,23 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
       setList(listcp)
    }
 
-   const migrateToListById = (id, targetList) => {
-      sheetHandlers.add([list.find(task => task.id === id)], targetList)
-      remove(id)
-   }
-
    const move = (id, positions) => {
-      const listcp = [...list]
-      const currentIndex = listcp.findIndex(t => t.id === id)
-      if (listcp[currentIndex + positions]) {
+      const currentIndex = list.findIndex(t => t.id === id)
+      const newIndexToMove = currentIndex + positions
+      if (list[newIndexToMove]) {
+         const listcp = [...list]
          const currentItem = listcp.find(t => t.id === id)
-         listcp[currentIndex] = listcp[currentIndex + positions]
-         listcp[currentIndex + positions] = currentItem
+         listcp[currentIndex] = listcp[newIndexToMove]
+         listcp[newIndexToMove] = currentItem
          setList(listcp)
+      } else {
+         if (newIndexToMove < 0) promote(id)
+         else if (newIndexToMove > list.length - 1) postpone(id)
       }
    }
-   const isLastItem = id => list.findIndex(t => t.id === id) === list.length - 1
+   const isBottomItem = id => list.findIndex(t => t.id === id) === list.length - 1
    const remove = id => {
-      if (isLastItem(id)) {
+      if (isBottomItem(id)) {
          navigableHandlers.focusUp(id)
       } else {
          navigableHandlers.focusDown(id)
@@ -149,12 +166,9 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
    }
 
    const slideFocus = (id, positions) => {
-      const tdIdx = list.findIndex(td => td.id === id)
-      if (
-         (positions < 0 && tdIdx + positions >= 0) ||
-         (positions > 0 && tdIdx + positions < list.length)
-      )
-         focusOn(list[tdIdx + positions].id)
+      const startIdx = list.findIndex(td => td.id === id)
+      const newIdxToFocus = startIdx + positions
+      if (newIdxToFocus >= 0 && newIdxToFocus < list.length) focusOn(list[newIdxToFocus].id)
    }
 
    const focusOn = id => {

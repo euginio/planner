@@ -69,11 +69,15 @@ function Sheet({ name }) {
 
    const sheetHandlers = {
       taskMoved: () => setTaskMovement({}),
-      add: (items, listName) => setTaskMovement({ targetTaskList: listName, tasksToMove: items }),
+      add: (items, listName, position) =>
+         setTaskMovement({ targetTaskList: listName, tasksToMove: items, position: position }),
       // focusedOnMe: taskListName => setTaskMovement(taskListName),
    }
 
    function handleKeyDown(e) {
+      if (e.key === 'Alt') {
+         e.preventDefault() // prevents put prompt at begining
+      }
       if (e.altKey && ['PageDown', 'PageUp'].includes(e.key)) {
          const activeListIdx = listNames.findIndex(l => l === activeList)
          if (e.key === 'PageDown' && activeListIdx < listNames.length - 1) {
@@ -96,6 +100,7 @@ function Sheet({ name }) {
                sheetHandlers={sheetHandlers}
                taskMovement={taskMovement}
                isActive={activeList === listName}
+               activate={setActiveList}
             ></List>
          ))}
       </div>

@@ -12,7 +12,6 @@ const NavigableList = ({ navigableHandlers, itemActions, list, ...params }) => {
                if (e.altKey && itemActions.sortable) {
                   navigableHandlers.moveUp(id)
                } else {
-                  // e.stopPropagation()
                   navigableHandlers.focusUp(id)
                }
                e.preventDefault() // prevents put prompt at begining
@@ -22,6 +21,8 @@ const NavigableList = ({ navigableHandlers, itemActions, list, ...params }) => {
                   navigableHandlers.moveDown(id)
                } else {
                   navigableHandlers.focusDown(id)
+                  // e.stopPropagation()
+                  e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
                }
             }
             if (e.ctrlKey) {

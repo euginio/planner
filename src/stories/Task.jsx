@@ -1,10 +1,11 @@
 import classNames from 'classnames'
 import React, { useEffect, useRef } from 'react'
+import { DEBUGG_MODE } from '../App'
 import './Task.css'
 
 const Task = ({
    id,
-   focus = true,
+   focus = false,
    text = '',
    done = false,
    size = 1,
@@ -15,7 +16,7 @@ const Task = ({
    const taskInputRef = useRef()
 
    useEffect(() => {
-      if (focus && allowedActions?.editable && taskInputRef?.current) taskInputRef.current.focus()
+      if (focus && taskInputRef?.current) taskInputRef.current.focus()
    }, [focus, allowedActions])
 
    const increaseSize = () => handlers.setSize(id, size + 1)
@@ -23,7 +24,7 @@ const Task = ({
       if (size > 1) handlers.setSize(id, size - 1)
    }
    const updateText = () => {
-      if (taskInputRef.current.value) handlers.setText(id, taskInputRef.current.value)
+      handlers.setText(id, taskInputRef.current.value ? taskInputRef.current.value : '')
    }
    const swipeDone = () => handlers.setDone(id, !done)
 
@@ -64,7 +65,10 @@ const Task = ({
                   readOnly={!allowedActions?.editable}
                   onChange={updateText}
                   value={text}
-                  className={classNames('taskInput', 'labeledInput', { crossOut: done })}
+                  className={classNames('taskInput', {
+                     crossOut: done,
+                     labeledInput: !DEBUGG_MODE,
+                  })}
                />
             ) : (
                <label className={classNames('taskLabel', { crossOut: done })}>{text || '_'}</label>

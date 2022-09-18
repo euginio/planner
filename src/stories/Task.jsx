@@ -10,6 +10,7 @@ const Task = ({
    size = 1,
    relevance = 1,
    handlers,
+   itemActions,
 }) => {
    const taskInputRef = useRef()
 
@@ -17,40 +18,31 @@ const Task = ({
       if (taskInputRef && taskInputRef.current) taskInputRef.current.focus()
    }, [editable])
 
-   const increaseSize = () => {
-      handlers.setSize(id, size + 1)
-   }
-
+   const increaseSize = () => handlers.setSize(id, size + 1)
    const decreaseSize = () => {
       if (size > 1) handlers.setSize(id, size - 1)
    }
-
    const updateText = () => {
       if (taskInputRef.current.value) handlers.setText(id, taskInputRef.current.value)
    }
-
-   const swipeDone = () => {
-      handlers.setDone(id, !done)
-   }
+   const swipeDone = () => handlers.setDone(id, !done)
 
    const handleInputKeyDown = e => {
       //['ctrlKey', 'shiftKey', 'altKey', 'metaKey']
 
       if (e.key === 'Enter') {
-         if (e.altKey) {
+         if (e.altKey && itemActions.completable) {
             swipeDone()
             e.stopPropagation()
          }
       }
-      if (e.key === 'ArrowUp') {
-         if (e.ctrlKey) {
+      if (e.ctrlKey && itemActions.sizeable) {
+         if (e.key === 'ArrowUp') {
             increaseSize()
             e.preventDefault()
             e.stopPropagation()
          }
-      }
-      if (e.key === 'ArrowDown') {
-         if (e.ctrlKey) {
+         if (e.key === 'ArrowDown') {
             decreaseSize()
             e.preventDefault()
             e.stopPropagation()

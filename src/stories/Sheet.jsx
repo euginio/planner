@@ -8,9 +8,8 @@ import './Sheet.css'
 function Sheet({ name }) {
    // const listNames = ['todos', 'backlog', 'someday', 'done', 'deleted']
 
-   const [lists, setLists] = useState({
+   const listsConf = {
       todos: {
-         focus: true,
          listMovements: {
             clearCompletedTo: 'done',
             removeTo: 'deleted',
@@ -63,9 +62,10 @@ function Sheet({ name }) {
          },
       },
       deleted: { listMovements: { deleteAllTo: null } },
-   })
-
+   }
+   const listNames = Object.keys(listsConf)
    const [taskMovement, setTaskMovement] = useState({})
+   const [activeList, setActiveList] = useState(listNames[0])
 
    const sheetHandlers = {
       taskMoved: () => setTaskMovement({}),
@@ -76,7 +76,7 @@ function Sheet({ name }) {
 
    function handleKeyDown(e) {
       if (e.altKey && ['PageDown', 'PageUp'].includes(e.key)) {
-         const activeListIdx = listNames.findIndex(l => l == activeList)
+         const activeListIdx = listNames.findIndex(l => l === activeList)
          if (e.key === 'PageDown' && activeListIdx < listNames.length - 1) {
             setActiveList(listNames[activeListIdx + 1])
          } else if (e.key === 'PageUp' && activeListIdx > 0) {
@@ -86,18 +86,18 @@ function Sheet({ name }) {
    }
 
    return (
-      // <div onKeyDown={e => handleKeyDown(e)}>
-      <div>
+      <div onKeyDown={e => handleKeyDown(e)}>
          <h2>Sheet {name}</h2>
-         {Object.keys(lists).map(listName => (
+         {Object.keys(listsConf).map(listName => (
             <List
                key={listName}
                name={listName}
                sheetName={name}
                // clearCompletedTo={clearCompletedTo}
-               listConfig={lists[listName]}
+               listConfig={listsConf[listName]}
                sheetHandlers={sheetHandlers}
                taskMovement={taskMovement}
+               isActive={activeList === listName}
             ></List>
          ))}
       </div>

@@ -2,10 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import NavigableList from './NavigableList'
 
 // @param {itemActions} determines the posible actions for this list (add, editable, navigable, completable, sizeable, sortable)
-const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement }) => {
+const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActive }) => {
    const [list, setList] = useState([])
 
-   const active = useMemo(() => listConfig.focus, [listConfig.focus])
    const LS_LIST_KEY = useMemo(() => sheetName + '.' + name, [sheetName, name])
 
    const listMovements = listConfig.listMovements
@@ -23,9 +22,9 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement }) => {
    }, [list, LS_LIST_KEY])
 
    useEffect(() => {
-      if (!active) unFocusAll()
+      if (!isActive) unFocusAll()
       else navigableHandlers.focusOnFirst()
-   }, [active])
+   }, [isActive])
 
    useEffect(() => {
       if (taskMovement?.targetTaskList === name) {

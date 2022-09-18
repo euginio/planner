@@ -9,7 +9,7 @@ const Task = ({
    text = '',
    done = false,
    size = 1,
-   relevance = 1,
+   impact = 1,
    handlers,
    allowedActions,
 }) => {

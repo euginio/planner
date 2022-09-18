@@ -6,13 +6,15 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
    const [list, setList] = useState([])
 
    const LS_LIST_KEY = useMemo(() => sheetName + '.' + name, [sheetName, name])
-
+   const defaultNewTask = useMemo(
+      () => ({ focus: true, text: '', done: false, size: 1, impact: 1 }),
+      []
+   )
    const listMovements = listConfig.listMovements
 
    useEffect(() => {
       let loadedList = JSON.parse(localStorage.getItem(LS_LIST_KEY))
-      if (!loadedList)
-         loadedList = [{ id: 1, focus: true, text: '', done: false, size: 1, relevance: 1 }]
+      if (!loadedList) loadedList = [{ id: 1, ...defaultNewTask }]
 
       setList(loadedList)
    }, [LS_LIST_KEY])
@@ -92,7 +94,7 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
    const addTask = (aboveId, taskToAdd) => {
       setList(prevlist => {
          const maxTaskId = prevlist.length ? Math.max(...prevlist.map(t => t.id)) : 0
-         let newTask = taskToAdd ? taskToAdd : { focus: true }
+         let newTask = taskToAdd ? taskToAdd : defaultNewTask
          newTask = { ...newTask, id: maxTaskId + 1 }
          let listcp = [...prevlist]
          if (aboveId) {

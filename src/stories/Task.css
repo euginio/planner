@@ -10,7 +10,8 @@
 } */
 
 .crossOut {
-   text-decoration: line-through
+   text-decoration: line-through;
+   text-decoration-thickness: 1px;
 }
 
 .taskHolder{
@@ -22,17 +23,4 @@
 }
 .taskHolder.showSize{
    border-left: groove;
-}
-
-.taskHolder[size='2']{
-   height: 40px;
-}
-.taskHolder[size='3']{
-   height: 60px;
-}
-.taskHolder[size='4']{
-   height: 80px;
-}
-.taskHolder[size='5']{
-   height: 100px;
 }

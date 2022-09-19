@@ -12,6 +12,7 @@ const Task = ({
    impact = 1,
    handlers,
    allowedActions,
+   liHour,
 }) => {
    const taskInputRef = useRef()
 
@@ -54,10 +55,15 @@ const Task = ({
    return (
       <>
          <li
-            className={classNames('taskHolder', { showSize: size > 1 })}
+            className={classNames('taskHolder', {
+               showSize: size > 1,
+               halfHour: !Number.isInteger(liHour),
+            })}
             size={size}
+            style={{ height: 20 * size + 'px' }}
             onClick={() => handlers.handleOnItemClick(id)}
             onKeyDown={handleInputKeyDown}
+            value={liHour.toString()}
          >
             {focus ? (
                <input

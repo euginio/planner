@@ -2,7 +2,7 @@ import TaskCounter from './TaskCounter'
 
 function TaskInfo({ tasks }) {
    return (
-      <p>
+      <p style={{ display: 'inline' }}>
          <TaskCounter tasks={tasks} condition={t => !t.done}>
             pending
          </TaskCounter>

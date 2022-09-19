@@ -20,6 +20,7 @@
    border-top: 0;
    border-right: 0;
    margin-top: 5px;
+   list-style-type: none;
 }
 .taskHolder .showSize{
    border-left: groove;

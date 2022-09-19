@@ -56,12 +56,14 @@ const Task = ({
       <>
          <li
             className={classNames('taskHolder')}
-            size={size}
             onClick={() => handlers.handleOnItemClick(id)}
             onKeyDown={handleInputKeyDown}
-            value={liHour.toString()}
          >
-            <span>{Number.isInteger(liHour) ? '00' : '30'}</span>
+            <span>
+               {Number.parseInt(liHour)}:
+               {Number.isInteger(liHour) ? <>&nbsp;&nbsp;&nbsp;&nbsp;</> : '30'}
+               &nbsp;&nbsp;&nbsp;
+            </span>
             <div
                className={classNames({ showSize: size > 1 })}
                style={{ height: 20 * size + 'px', display: 'inline-block' }}

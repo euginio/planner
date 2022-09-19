@@ -21,6 +21,6 @@
    border-right: 0;
    margin-top: 5px;
 }
-.taskHolder.showSize{
+.taskHolder .showSize{
    border-left: groove;
 }

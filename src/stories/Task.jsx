@@ -55,30 +55,34 @@ const Task = ({
    return (
       <>
          <li
-            className={classNames('taskHolder', {
-               showSize: size > 1,
-               halfHour: !Number.isInteger(liHour),
-            })}
+            className={classNames('taskHolder')}
             size={size}
-            style={{ height: 20 * size + 'px' }}
             onClick={() => handlers.handleOnItemClick(id)}
             onKeyDown={handleInputKeyDown}
             value={liHour.toString()}
          >
-            {focus ? (
-               <input
-                  ref={taskInputRef}
-                  readOnly={!allowedActions?.editable}
-                  onChange={updateText}
-                  value={text}
-                  className={classNames('taskInput', {
-                     crossOut: done,
-                     labeledInput: !DEBUGG_MODE,
-                  })}
-               />
-            ) : (
-               <label className={classNames('taskLabel', { crossOut: done })}>{text || '_'}</label>
-            )}
+            <span>{Number.isInteger(liHour) ? '00' : '30'}</span>
+            <div
+               className={classNames({ showSize: size > 1 })}
+               style={{ height: 20 * size + 'px', display: 'inline-block' }}
+            >
+               {focus ? (
+                  <input
+                     ref={taskInputRef}
+                     readOnly={!allowedActions?.editable}
+                     onChange={updateText}
+                     value={text}
+                     className={classNames('taskInput', {
+                        crossOut: done,
+                        labeledInput: !DEBUGG_MODE,
+                     })}
+                  />
+               ) : (
+                  <label className={classNames('taskLabel', { crossOut: done })}>
+                     {text || '_'}
+                  </label>
+               )}
+            </div>
          </li>
       </>
    )

@@ -66,7 +66,7 @@ const Task = ({
             </span>
             <div
                className={classNames({ showSize: size > 1 })}
-               style={{ height: 20 * size + 'px', display: 'inline-block' }}
+               style={{ height: 20 * size + 'px', display: 'inline-block', width: '90%' }}
             >
                {focus ? (
                   <input

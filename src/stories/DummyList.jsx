@@ -3,7 +3,7 @@ import TaskInfo from './TaskInfo'
 import './DummyList.css'
 
 const DummyList = ({ list, name, itemHandlers, ...params }) => {
-   let liHour = 10
+   let liHour = 8.5
    return (
       <>
          <h3 style={{ display: 'inline' }}>{name}</h3>

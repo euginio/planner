@@ -13,7 +13,7 @@ const DummyList = ({ list, name, itemHandlers, ...params }) => {
                const renderr = (
                   <Task
                      key={t.id}
-                     editable={t.focus}
+                     focus={t.focus}
                      {...t}
                      handlers={itemHandlers}
                      {...params}

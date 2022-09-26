@@ -2,7 +2,15 @@ import { useEffect, useMemo, useState } from 'react'
 import NavigableList from './NavigableList'
 
 // @param {itemActions} determines the posible actions for this list (add, editable, navigable, completable, sizeable, sortable)
-const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActive, activate }) => {
+const List = ({
+   sheetName,
+   name,
+   listConfig,
+   sheetHandlers,
+   taskMovement,
+   isActive,
+   activateHandler,
+}) => {
    const [list, setList] = useState([])
 
    const LS_LIST_KEY = useMemo(() => sheetName + '.' + name, [sheetName, name])
@@ -25,9 +33,7 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
 
    useEffect(() => {
       if (!isActive) unFocusAll()
-      else {
-         if (!list.find(i => i.focus === true)) navigableHandlers.focusOnFirst()
-      }
+      else if (!list.find(i => i.focus === true)) navigableHandlers.focusOnFirst()
    }, [isActive])
 
    useEffect(() => {
@@ -86,8 +92,8 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
       setText: (id, value) => setItemAttr(id, 'text', value),
       setDone: (id, value) => setItemAttr(id, 'done', value),
       handleOnItemClick: id => {
+         activateHandler(name)
          focusOn(id)
-         activate(name)
       },
    }
 
@@ -174,8 +180,8 @@ const List = ({ sheetName, name, listConfig, sheetHandlers, taskMovement, isActi
    }
 
    const focusOn = id => {
-      let listcp = [...list]
       unFocusAll()
+      let listcp = [...list]
       listcp.find(i => i.id === id).focus = true
       setList(listcp)
    }

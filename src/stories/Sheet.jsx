@@ -100,7 +100,7 @@ function Sheet({ name }) {
                sheetHandlers={sheetHandlers}
                taskMovement={taskMovement}
                isActive={activeList === listName}
-               activate={setActiveList}
+               activateHandler={setActiveList}
             ></List>
          ))}
       </div>

@@ -59,7 +59,7 @@ const Task = ({
             onClick={() => handlers.handleOnItemClick(id)}
             onKeyDown={handleInputKeyDown}
          >
-            <span>
+            <span className='hourLabel'>
                {Number.parseInt(liHour)}:
                {Number.isInteger(liHour) ? <>&nbsp;&nbsp;&nbsp;&nbsp;</> : '30'}
                &nbsp;&nbsp;&nbsp;

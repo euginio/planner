@@ -25,3 +25,8 @@
 .taskHolder .showSize{
    border-left: groove;
 }
+
+.hourLabel {
+   width: 50px;
+   display: inline-block;
+}

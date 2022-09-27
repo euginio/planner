@@ -52,6 +52,10 @@ const List = ({
 
    // clearCompletedTo, removeTo, postponeTo, promoteTo
    const handleInputKeyDown = e => {
+      if (['Alt', 'Control'].includes(e.key)) {
+         e.preventDefault() // prevents put prompt at begining
+         e.stopPropagation()
+      }
       const id = list.find(i => i.focus)?.id || list[0].id
       if (
          listMovements.removeTo &&

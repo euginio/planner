@@ -31,7 +31,10 @@ const Task = ({
 
    const handleInputKeyDown = e => {
       //['ctrlKey', 'shiftKey', 'altKey', 'metaKey']
-
+      if (['Alt', 'Control'].includes(e.key)) {
+         e.preventDefault() // prevents put prompt at begining
+         e.stopPropagation()
+      }
       if (e.key === 'Enter') {
          if (e.altKey && allowedActions.completable) {
             swipeDone()

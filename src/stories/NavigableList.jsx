@@ -2,6 +2,10 @@ import DummyList from './DummyList'
 
 const NavigableList = ({ navigableHandlers, itemActions, list, ...params }) => {
    const handleNavigableInputKeyDown = e => {
+      if (['Alt', 'Control'].includes(e.key)) {
+         e.preventDefault() // prevents put prompt at begining
+         e.stopPropagation()
+      }
       if (itemActions) {
          const id = list.find(i => i.focus).id
          if (e.key === 'Enter' && itemActions.add) {

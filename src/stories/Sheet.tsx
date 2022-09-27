@@ -5,17 +5,22 @@ import { useState } from 'react'
 import List from './List'
 import './Sheet.css'
 
-function Sheet({ name }:{name:string}) {
-   interface ListConf {
-      listMovements?: {
-         clearCompletedTo?: string
-         removeTo?: string | null
-         postponeTo?: string
-         promoteTo?: string
-         deleteAllTo?: string | null
-      }
-      itemsNavigation?: any
+export interface ListConf {
+   listMovements: {
+      clearCompletedTo?: string
+      removeTo?: string | null
+      postponeTo?: string
+      promoteTo?: string
+      deleteAllTo?: string | null
    }
+   itemsNavigation?: any
+}
+export interface TaskMovement {
+   targetTaskList: string
+   tasksToMove: any[]
+   position: number
+}
+function Sheet({ name }:{name:string}) {
 
    // const listNames = ['todos', 'backlog', 'someday', 'done', 'deleted']
 
@@ -75,10 +80,11 @@ function Sheet({ name }:{name:string}) {
       deleted: { listMovements: { deleteAllTo: null } },
    }
    const listNames = Object.keys(listsConf)
-   const [taskMovement, setTaskMovement] = useState<{targetTaskList: string, tasksToMove: any[], position: number }|any>()
+   
+   const [taskMovement, setTaskMovement] = useState<TaskMovement|any>()
    const [activeList, setActiveList] = useState(listNames[0])
 
-   const sheetHandlers = {
+   const sheetHandlers:{[key:string]:(...a:any)=>void} = {
       taskMoved: () => setTaskMovement({}),
       add: (items:string[], listName:string, position:number) =>
          setTaskMovement({ targetTaskList: listName, tasksToMove: items, position: position }),

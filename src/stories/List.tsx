@@ -1,5 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import NavigableList from './NavigableList'
+import { ListConf, TaskMovement } from './Sheet'
+
+interface TaskI {
+   focus: boolean
+   text: string
+   done: boolean
+   size: number
+   impact: number
+}
+interface Task extends TaskI{
+   id: number
+}
 
 // @param {itemActions} determines the posible actions for this list (add, editable, navigable, completable, sizeable, sortable)
 const List = ({
@@ -10,19 +22,27 @@ const List = ({
    taskMovement,
    isActive,
    activateHandler,
+}:{
+   sheetName:string,
+   name:string,
+   listConfig:ListConf,
+   sheetHandlers:{[key:string]:(...a:any)=>void},
+   taskMovement:TaskMovement,
+   isActive:boolean,
+   activateHandler:(a:string)=>void,
 }) => {
-   const [list, setList] = useState([])
+   const [list, setList] = useState<Task[]>([])
 
    const LS_LIST_KEY = useMemo(() => sheetName + '.' + name, [sheetName, name])
-   const defaultNewTask = useMemo(
+   const defaultNewTask:TaskI = useMemo(
       () => ({ focus: true, text: '', done: false, size: 1, impact: 1 }),
       []
    )
    const listMovements = listConfig.listMovements
 
    useEffect(() => {
-      let loadedList = JSON.parse(localStorage.getItem(LS_LIST_KEY))
-      if (!loadedList) loadedList = [{ id: 1, ...defaultNewTask }]
+      let loadedList = JSON.parse(localStorage.getItem(LS_LIST_KEY)||'[]')
+      if (!loadedList) loadedList = [{ ...defaultNewTask, id: 1 }]
 
       setList(loadedList)
    }, [LS_LIST_KEY])
@@ -41,7 +61,7 @@ const List = ({
          //is a new task for me, adding it...
          taskMovement.tasksToMove.forEach(t => {
             // taskMovement.position: -1 = last; 0 = first; other = that position
-            let id = null
+            let id = undefined
             if (taskMovement.position === -1) id = list[list.length - 1].id
             if (taskMovement.position > 0) id = list[taskMovement.position].id
             addTask(id, 1, t)
@@ -51,27 +71,27 @@ const List = ({
    }, [taskMovement, name])
 
    // clearCompletedTo, removeTo, postponeTo, promoteTo
-   const handleInputKeyDown = e => {
+   const handleInputKeyDown = (e:React.KeyboardEvent) => {
       if (['Alt', 'Control'].includes(e.key)) {
          e.preventDefault() // prevents put prompt at begining
          e.stopPropagation()
       }
-      const id = list.find(i => i.focus)?.id || list[0].id
+      const task = list.find(i => i.focus)!
       if (
          listMovements.removeTo &&
          (e.key === 'Backspace' || e.key === 'Delete') &&
-         (e.altKey || !list.find(i => i.id === id).text)
+         (e.altKey || !task.text)
       ) {
-         deleteItem(id)
+         deleteItem(task.id)
          e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
       }
       if (e.altKey) {
          if (listMovements.postponeTo && e.key === 'ArrowRight') {
-            postpone(id)
+            postpone(task.id)
             e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
          }
          if (listMovements.promoteTo && e.key === 'ArrowLeft') {
-            promote(id)
+            promote(task.id)
             e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
          }
       }
@@ -85,32 +105,32 @@ const List = ({
       }
    }
 
-   const setItemAttr = (id, attr, value) => {
+   const setItemAttr = (id:number, attr:string, value:any) => {
       let listcp = [...list]
+      //@ts-ignore
       listcp.find(i => i.id === id)[attr] = value
       setList(listcp)
    }
 
    const itemHandlers = {
-      setSize: (id, value) => setItemAttr(id, 'size', value),
-      setText: (id, value) => setItemAttr(id, 'text', value),
-      setDone: (id, value) => setItemAttr(id, 'done', value),
-      handleOnItemClick: id => {
+      setSize: (id:number, value:number) => setItemAttr(id, 'size', value),
+      setText: (id:number, value:string) => setItemAttr(id, 'text', value),
+      setDone: (id:number, value:boolean) => setItemAttr(id, 'done', value),
+      handleOnItemClick: (id:number) => {
          focusOn(id)
          activateHandler(name)
       },
    }
 
-   const addTask = (aboveId, positions = 1, taskToAdd) => {
+   const addTask = (aboveId?:number, positions?:number, taskToAdd?:Task) => {
       setList(prevlist => {
-         const maxTaskId = prevlist.length ? Math.max(...prevlist.map(t => t.id)) : 0
-         let newTask = taskToAdd ? taskToAdd : defaultNewTask
-         newTask = { ...newTask, id: maxTaskId + 1 }
+         const maxTaskId = prevlist.length ? Math.max(...prevlist.map(t => t.id || -1)) : 0
+         let newTask = taskToAdd ? taskToAdd : {...defaultNewTask, id: maxTaskId + 1}
          let listcp = [...prevlist]
          if (aboveId) {
-            listcp.find(t => t.id === aboveId).focus = false
+            listcp.find(t => t.id === aboveId)!.focus = false
             const aboveTaskIdx = listcp.findIndex(t => t.id === aboveId)
-            listcp.splice(aboveTaskIdx + positions, 0, newTask)
+            listcp.splice(aboveTaskIdx + (positions||1), 0, newTask)
          } else {
             listcp.unshift(newTask)
          }
@@ -119,24 +139,24 @@ const List = ({
    }
 
    const navigableHandlers = {
-      addTask: (aboveId, positions) => addTask(aboveId, positions),
-      moveUp: id => move(id, -1),
-      moveDown: id => move(id, 1),
+      addTask: (aboveId:number, positions:number) => addTask(aboveId, positions),
+      moveUp: (id:number)=> exchange(id, -1),
+      moveDown: (id:number)=> exchange(id, 1),
       focusOnFirst: () => {
          if (list.length) focusOn(list[0].id)
       },
       focusOnLast: () => {
          if (list.length) focusOn(list[list.length - 1].id)
       },
-      focusUp: id => slideFocus(id, -1),
-      focusDown: id => slideFocus(id, 1),
+      focusUp: (id:number)=> slideFocus(id, -1),
+      focusDown: (id:number)=> slideFocus(id, 1),
    }
 
-   const deleteItem = id => migrateToListById(id, listMovements.removeTo, 0)
-   const postpone = id => migrateToListById(id, listMovements.postponeTo, 0)
-   const promote = id => migrateToListById(id, listMovements.promoteTo, -1)
+   const deleteItem = (id:number)=> migrateToListById(id, 0, listMovements.removeTo)
+   const postpone = (id:number)=> migrateToListById(id, 0, listMovements.postponeTo)
+   const promote = (id:number)=> migrateToListById(id, -1, listMovements.promoteTo)
 
-   const migrateToListById = (id, targetList, position) => {
+   const migrateToListById = (id:number, position:number, targetList?:string|null) => {
       if (!targetList) return
       sheetHandlers.add([list.find(task => task.id === id)], targetList, position)
       remove(id)
@@ -151,12 +171,13 @@ const List = ({
       setList(listcp)
    }
 
-   const move = (id, positions) => {
+   const exchange = (id:number, positions:number) => {
       const currentIndex = list.findIndex(t => t.id === id)
       const newIndexToMove = currentIndex + positions
       if (list[newIndexToMove]) {
          const listcp = [...list]
-         const currentItem = listcp.find(t => t.id === id)
+         const currentItem = listcp.find(t => t.id === id)!
+         //this swap items, 
          listcp[currentIndex] = listcp[newIndexToMove]
          listcp[newIndexToMove] = currentItem
          setList(listcp)
@@ -165,8 +186,8 @@ const List = ({
          else if (newIndexToMove > list.length - 1) postpone(id)
       }
    }
-   const isBottomItem = id => list.findIndex(t => t.id === id) === list.length - 1
-   const remove = id => {
+   const isBottomItem = (id:number)=> list.findIndex(t => t.id === id) === list.length - 1
+   const remove = (id:number)=> {
       if (isBottomItem(id)) {
          navigableHandlers.focusUp(id)
       } else {
@@ -177,21 +198,21 @@ const List = ({
       setList(updatedlist)
    }
 
-   const slideFocus = (id, positions) => {
+   const slideFocus = (id:number, positions:number) => {
       const startIdx = list.findIndex(td => td.id === id)
       const newIdxToFocus = startIdx + positions
       if (newIdxToFocus >= 0 && newIdxToFocus < list.length) focusOn(list[newIdxToFocus].id)
    }
 
-   const focusOn = id => {
+   const focusOn = (id:number)=> {
       unFocusAll()
       let listcp = [...list]
-      listcp.find(i => i.id === id).focus = true
+      listcp.find(i => i.id === id)!.focus = true
       setList(listcp)
    }
 
    return (
-      <div onKeyDown={e => handleInputKeyDown(e)}>
+      <div onKeyDown={handleInputKeyDown}>
          <NavigableList
             list={list}
             name={name}
@@ -199,7 +220,7 @@ const List = ({
             itemHandlers={itemHandlers}
             itemActions={listConfig.itemsNavigation}
          ></NavigableList>
-         {listConfig.listMovements.clearCompletedTo && (
+         {listMovements.clearCompletedTo && (
             <button onClick={clearCompleted}>Clear complete</button>
          )}
       </div>

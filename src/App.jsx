@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import Sheet from './stories/Sheet'
-export const DEBUGG_MODE = false
+export const DEBUGG_MODE = true
 
 function App() {
    const [sheets, setSheets] = useState(new Set())
@@ -11,12 +11,30 @@ function App() {
    useEffect(() => {
       // if (sheets.length > 0 && !currentSheet) setCurrentSheet(sheets[0])
       const loadedSheets = JSON.parse(localStorage.getItem(LS_SHEETS_KEY))
-      if (loadedSheets && Object.keys(loadedSheets).length) setSheets(new Set(loadedSheets))
+      if (loadedSheets && Object.keys(loadedSheets).length) {
+         setSheets(new Set(loadedSheets))
+         setCurrentSheet('today')
+      }
    }, [])
 
    useEffect(() => {
       if (sheets.size) localStorage.setItem(LS_SHEETS_KEY, JSON.stringify([...sheets]))
    }, [sheets])
+
+   const handleGlobalInputKeyDown = e => {
+      if (e.key === 'Control') {
+         e.preventDefault() // prevents put prompt at begining
+         e.stopPropagation()
+      }
+      if (e.ctrlKey && ['PageDown', 'PageUp'].includes(e.key)) {
+         const idxMove = e.key === 'PageDown' ? 1 : -1
+         const sheetArray = [...sheets]
+         const currentSheetIdx = sheetArray.findIndex(s => s === currentSheet)
+         setCurrentSheet(sheetArray[currentSheetIdx + idxMove])
+         e.preventDefault() // prevents put prompt at begining
+         e.stopPropagation()
+      }
+   }
 
    const handleInputKeyDown = e => {
       if (e.key === 'Enter' && inputAddSheet.current.value.trim()) {
@@ -36,7 +54,7 @@ function App() {
       })
 
    return (
-      <>
+      <div onKeyDown={handleGlobalInputKeyDown}>
          <ul className='sheetList'>
             {[...sheets].map(s => (
                <li key={s}>
@@ -63,7 +81,7 @@ function App() {
             )}
          </ul>
          {currentSheet && <Sheet name={currentSheet}></Sheet>}
-      </>
+      </div>
    )
 }
 

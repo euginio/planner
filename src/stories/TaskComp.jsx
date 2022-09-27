@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react'
 import { DEBUGG_MODE } from '../App'
 import './Task.css'
 
-const Task = ({
+const TaskComp = ({
    id,
    focus = false,
    text = '',
@@ -93,4 +93,4 @@ const Task = ({
    )
 }
 
-export default Task
+export default TaskComp

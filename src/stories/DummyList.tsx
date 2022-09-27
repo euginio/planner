@@ -1,9 +1,17 @@
-import Task from './Task'
+import { DEBUGG_MODE } from '../App'
+import TaskComp from './TaskComp'
 import TaskInfo from './TaskInfo'
 import './DummyList.css'
-import { DEBUGG_MODE } from '../App'
+import { Task } from './List'
+import { itemNavigationType } from './Sheet'
 
-const DummyList = ({ list, name, itemHandlers, ...params }) => {
+const DummyList = ({ list, name, itemHandlers, allowedActions, ...params }:
+   {list:Task[],
+    name:string,
+    itemHandlers:{[key:string]:(...a:any)=>void},
+    allowedActions: itemNavigationType,
+    params:any
+   }) => {
    let liHour = 8.5
    return (
       <>
@@ -12,14 +20,14 @@ const DummyList = ({ list, name, itemHandlers, ...params }) => {
          <ol>
             {list.map(t => {
                const renderr = (
-                  <Task
+                  <TaskComp
                      key={t.id}
-                     focus={t.focus}
                      {...t}
                      handlers={itemHandlers}
+                     allowedActions={allowedActions}
                      {...params}
                      liHour={liHour}
-                  ></Task>
+                  ></TaskComp>
                )
                liHour += t.size * 0.5
                return renderr

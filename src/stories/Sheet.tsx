@@ -5,15 +5,25 @@ import { useState } from 'react'
 import List from './List'
 import './Sheet.css'
 
+interface ListMovementType {
+   clearCompletedTo?: string
+   removeTo?: string | null
+   postponeTo?: string
+   promoteTo?: string
+   deleteAllTo?: string | null
+}
+
+export interface itemNavigationType {
+   add: boolean
+   editable: boolean
+   completable: boolean
+   sizeable: boolean
+   sortable: boolean
+}
+
 export interface ListConf {
-   listMovements: {
-      clearCompletedTo?: string
-      removeTo?: string | null
-      postponeTo?: string
-      promoteTo?: string
-      deleteAllTo?: string | null
-   }
-   itemsNavigation?: any
+   listMovements: ListMovementType
+   itemsNavigation?: itemNavigationType
 }
 export interface TaskMovement {
    targetTaskList: string
@@ -72,12 +82,14 @@ function Sheet({ name }:{name:string}) {
       done: {
          listMovements: {},
          itemsNavigation: {
+            add:false,
+            editable:false,
             completable: true,
             sizeable: true,
             sortable: true,
          },
       },
-      deleted: { listMovements: { deleteAllTo: null } },
+      deleted: { listMovements: { deleteAllTo: null }},
    }
    const listNames = Object.keys(listsConf)
    

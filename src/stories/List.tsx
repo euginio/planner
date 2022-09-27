@@ -2,14 +2,14 @@ import { useEffect, useMemo, useState } from 'react'
 import NavigableList from './NavigableList'
 import { ListConf, TaskMovement } from './Sheet'
 
-interface TaskI {
+export interface TaskI {
    focus: boolean
    text: string
    done: boolean
    size: number
    impact: number
 }
-interface Task extends TaskI{
+export interface Task extends TaskI{
    id: number
 }
 
@@ -112,7 +112,7 @@ const List = ({
       setList(listcp)
    }
 
-   const itemHandlers = {
+   const itemHandlers:{[key:string]:(...a:any)=>void} = {
       setSize: (id:number, value:number) => setItemAttr(id, 'size', value),
       setText: (id:number, value:string) => setItemAttr(id, 'text', value),
       setDone: (id:number, value:boolean) => setItemAttr(id, 'done', value),
@@ -138,7 +138,7 @@ const List = ({
       })
    }
 
-   const navigableHandlers = {
+   const navigableHandlers:{[key:string]:(...a:any)=>void} = {
       addTask: (aboveId:number, positions:number) => addTask(aboveId, positions),
       moveUp: (id:number)=> exchange(id, -1),
       moveDown: (id:number)=> exchange(id, 1),

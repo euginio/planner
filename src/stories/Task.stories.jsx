@@ -1,11 +1,11 @@
 import React from 'react'
 
-import Task from './Task'
+import TaskComp from './TaskComp'
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
    title: 'Example/Task',
-   component: Task,
+   component: TaskComp,
    // More on argTypes: https://storybook.js.org/docs/react/api/argtypes
    // argTypes: {
    //    backgroundColor: { control: 'color' },
@@ -13,7 +13,7 @@ export default {
 }
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template = args => <Task {...args} />
+const Template = args => <TaskComp {...args} />
 
 export const EmptyTask = Template.bind({})
 // More on args: https://storybook.js.org/docs/react/writing-stories/args

@@ -5,10 +5,16 @@ import { useState } from 'react'
 import List from './List'
 import './Sheet.css'
 
-function Sheet({ name }) {
+function Sheet({ name }:{name:string}) {
    // const listNames = ['todos', 'backlog', 'someday', 'done', 'deleted']
 
-   const listsConf = {
+   const listsConf:{[key:string]:{listMovements?:{
+      clearCompletedTo?:string
+      removeTo?:string|null
+      postponeTo?:string 
+      promoteTo?:string
+      deleteAllTo?:string|null
+   }, itemsNavigation?:any}}= {
       todos: {
          listMovements: {
             clearCompletedTo: 'done',
@@ -64,19 +70,20 @@ function Sheet({ name }) {
       deleted: { listMovements: { deleteAllTo: null } },
    }
    const listNames = Object.keys(listsConf)
-   const [taskMovement, setTaskMovement] = useState({})
+   const [taskMovement, setTaskMovement] = useState<{targetTaskList: string, tasksToMove: any[], position: number }|any>()
    const [activeList, setActiveList] = useState(listNames[0])
 
    const sheetHandlers = {
       taskMoved: () => setTaskMovement({}),
-      add: (items, listName, position) =>
+      add: (items:string[], listName:string, position:number) =>
          setTaskMovement({ targetTaskList: listName, tasksToMove: items, position: position }),
       // focusedOnMe: taskListName => setTaskMovement(taskListName),
    }
 
-   function handleKeyDown(e) {
-      if (e.key === 'Alt') {
+   function handleKeyDown(e:React.KeyboardEvent) {
+      if (['Alt', 'Control'].includes(e.key)) {
          e.preventDefault() // prevents put prompt at begining
+         e.stopPropagation()
       }
       if (e.altKey && ['PageDown', 'PageUp'].includes(e.key)) {
          const activeListIdx = listNames.findIndex(l => l === activeList)
@@ -89,7 +96,7 @@ function Sheet({ name }) {
    }
 
    return (
-      <div onKeyDown={e => handleKeyDown(e)}>
+      <div onKeyDown={handleKeyDown}>
          <h2>Sheet {name}</h2>
          {Object.keys(listsConf).map(listName => (
             <List

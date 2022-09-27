@@ -1,17 +1,17 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, KeyboardEvent } from 'react'
 import Sheet from './stories/Sheet'
 export const DEBUGG_MODE = true
 
 function App() {
-   const [sheets, setSheets] = useState(new Set())
-   const [currentSheet, setCurrentSheet] = useState()
+   const [sheets, setSheets] = useState<Set<string>>(new Set())
+   const [currentSheet, setCurrentSheet] = useState<string>()
    const LS_SHEETS_KEY = 'App.Sheets'
-   const inputAddSheet = useRef()
+   const inputAddSheet = useRef<HTMLInputElement>(null)
 
    useEffect(() => {
       // if (sheets.length > 0 && !currentSheet) setCurrentSheet(sheets[0])
-      const loadedSheets = JSON.parse(localStorage.getItem(LS_SHEETS_KEY))
-      if (loadedSheets && Object.keys(loadedSheets).length) {
+      const loadedSheets = JSON.parse(localStorage.getItem(LS_SHEETS_KEY)||'[]')
+      if (loadedSheets.length) {
          setSheets(new Set(loadedSheets))
          setCurrentSheet('today')
       }
@@ -21,8 +21,9 @@ function App() {
       if (sheets.size) localStorage.setItem(LS_SHEETS_KEY, JSON.stringify([...sheets]))
    }, [sheets])
 
-   const handleGlobalInputKeyDown = e => {
-      if (e.key === 'Control') {
+   
+   const handleGlobalInputKeyDown = (e:KeyboardEvent) => {
+      if (['Alt', 'Control'].includes(e.key)) {
          e.preventDefault() // prevents put prompt at begining
          e.stopPropagation()
       }
@@ -36,18 +37,25 @@ function App() {
       }
    }
 
-   const handleInputKeyDown = e => {
-      if (e.key === 'Enter' && inputAddSheet.current.value.trim()) {
+   const handleInputKeyDown = (e:KeyboardEvent) => {
+      if (['Alt', 'Control'].includes(e.key)) {
+         e.preventDefault() // prevents put prompt at begining
+         e.stopPropagation()
+      }
+      //@ts-ignore
+      if (e.key === 'Enter' && inputAddSheet.current && inputAddSheet.current.value.trim()) {
+         //@ts-ignore
          const inputValue = inputAddSheet.current.value.trim()
          setSheets(prevSheets => new Set(prevSheets).add(inputValue.trim()))
+         //@ts-ignore
          inputAddSheet.current.value = ''
       }
    }
-   const handleSheetClick = s => {
+   const handleSheetClick = (s:string) => {
       let copy = s
       setCurrentSheet(copy)
    }
-   const deleteSheet = s =>
+   const deleteSheet = (s:string) =>
       setSheets(prevSheets => {
          prevSheets.delete(s)
          return new Set(prevSheets)
@@ -69,7 +77,7 @@ function App() {
                </li>
             ))}
             {currentSheet ? (
-               <li onClick={() => setCurrentSheet(null)}>
+               <li onClick={() => setCurrentSheet(undefined)}>
                   <a href='#'> {'<--'}</a>
                </li>
             ) : (

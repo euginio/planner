@@ -6,15 +6,20 @@ import List from './List'
 import './Sheet.css'
 
 function Sheet({ name }:{name:string}) {
+   interface ListConf {
+      listMovements?: {
+         clearCompletedTo?: string
+         removeTo?: string | null
+         postponeTo?: string
+         promoteTo?: string
+         deleteAllTo?: string | null
+      }
+      itemsNavigation?: any
+   }
+
    // const listNames = ['todos', 'backlog', 'someday', 'done', 'deleted']
 
-   const listsConf:{[key:string]:{listMovements?:{
-      clearCompletedTo?:string
-      removeTo?:string|null
-      postponeTo?:string 
-      promoteTo?:string
-      deleteAllTo?:string|null
-   }, itemsNavigation?:any}}= {
+   const listsConf:{[key:string]:ListConf}= {
       todos: {
          listMovements: {
             clearCompletedTo: 'done',

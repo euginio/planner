@@ -92,8 +92,8 @@ const List = ({
       setText: (id, value) => setItemAttr(id, 'text', value),
       setDone: (id, value) => setItemAttr(id, 'done', value),
       handleOnItemClick: id => {
-         activateHandler(name)
          focusOn(id)
+         activateHandler(name)
       },
    }
 

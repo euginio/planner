@@ -5,13 +5,17 @@ import './DummyList.css'
 import { Task } from './List'
 import { itemNavigationType } from './Sheet'
 
-const DummyList = ({ list, name, itemHandlers, allowedActions, ...params }:
-   {list:Task[],
-    name:string,
-    itemHandlers:{[key:string]:(...a:any)=>void},
-    allowedActions: itemNavigationType,
-    params:any
-   }) => {
+const DummyList = ({
+   list,
+   name,
+   itemHandlers,
+   allowedActions,
+}: {
+   list: Task[]
+   name: string
+   itemHandlers: { [key: string]: (...a: any) => void }
+   allowedActions: itemNavigationType
+}) => {
    let liHour = 8.5
    return (
       <>
@@ -25,7 +29,6 @@ const DummyList = ({ list, name, itemHandlers, allowedActions, ...params }:
                      {...t}
                      handlers={itemHandlers}
                      allowedActions={allowedActions}
-                     {...params}
                      liHour={liHour}
                   ></TaskComp>
                )

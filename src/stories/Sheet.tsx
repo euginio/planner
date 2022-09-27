@@ -23,18 +23,17 @@ export interface itemNavigationType {
 
 export interface ListConf {
    listMovements: ListMovementType
-   itemsNavigation?: itemNavigationType
+   itemsNavigation: itemNavigationType
 }
 export interface TaskMovement {
    targetTaskList: string
    tasksToMove: any[]
    position: number
 }
-function Sheet({ name }:{name:string}) {
-
+function Sheet({ name }: { name: string }) {
    // const listNames = ['todos', 'backlog', 'someday', 'done', 'deleted']
 
-   const listsConf:{[key:string]:ListConf}= {
+   const listsConf: { [key: string]: ListConf } = {
       todos: {
          listMovements: {
             clearCompletedTo: 'done',
@@ -82,28 +81,37 @@ function Sheet({ name }:{name:string}) {
       done: {
          listMovements: {},
          itemsNavigation: {
-            add:false,
-            editable:false,
+            add: false,
+            editable: false,
             completable: true,
             sizeable: true,
             sortable: true,
          },
       },
-      deleted: { listMovements: { deleteAllTo: null }},
+      deleted: {
+         listMovements: { deleteAllTo: null },
+         itemsNavigation: {
+            add: false,
+            editable: false,
+            completable: false,
+            sizeable: false,
+            sortable: false,
+         },
+      },
    }
    const listNames = Object.keys(listsConf)
-   
-   const [taskMovement, setTaskMovement] = useState<TaskMovement|any>()
+
+   const [taskMovement, setTaskMovement] = useState<TaskMovement | any>()
    const [activeList, setActiveList] = useState(listNames[0])
 
-   const sheetHandlers:{[key:string]:(...a:any)=>void} = {
+   const sheetHandlers: { [key: string]: (...a: any) => void } = {
       taskMoved: () => setTaskMovement({}),
-      add: (items:string[], listName:string, position:number) =>
+      add: (items: string[], listName: string, position: number) =>
          setTaskMovement({ targetTaskList: listName, tasksToMove: items, position: position }),
       // focusedOnMe: taskListName => setTaskMovement(taskListName),
    }
 
-   function handleKeyDown(e:React.KeyboardEvent) {
+   function handleKeyDown(e: React.KeyboardEvent) {
       if (['Alt', 'Control'].includes(e.key)) {
          e.preventDefault() // prevents put prompt at begining
          e.stopPropagation()

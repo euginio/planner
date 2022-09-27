@@ -10,7 +10,7 @@ function App() {
 
    useEffect(() => {
       // if (sheets.length > 0 && !currentSheet) setCurrentSheet(sheets[0])
-      const loadedSheets = JSON.parse(localStorage.getItem(LS_SHEETS_KEY)||'[]')
+      const loadedSheets = JSON.parse(localStorage.getItem(LS_SHEETS_KEY) || '[]')
       if (loadedSheets.length) {
          setSheets(new Set(loadedSheets))
          setCurrentSheet('today')
@@ -21,8 +21,7 @@ function App() {
       if (sheets.size) localStorage.setItem(LS_SHEETS_KEY, JSON.stringify([...sheets]))
    }, [sheets])
 
-   
-   const handleGlobalInputKeyDown = (e:KeyboardEvent) => {
+   const handleGlobalInputKeyDown = (e: KeyboardEvent) => {
       if (['Alt', 'Control'].includes(e.key)) {
          e.preventDefault() // prevents put prompt at begining
          e.stopPropagation()
@@ -37,13 +36,13 @@ function App() {
       }
    }
 
-   const handleInputKeyDown = (e:KeyboardEvent) => {
+   const handleInputKeyDown = (e: KeyboardEvent) => {
       if (['Alt', 'Control'].includes(e.key)) {
          e.preventDefault() // prevents put prompt at begining
          e.stopPropagation()
       }
       //@ts-ignore
-      if (e.key === 'Enter' && inputAddSheet.current && inputAddSheet.current.value.trim()) {
+      if (e.key === 'Enter' && inputAddSheet.current.value.trim()) {
          //@ts-ignore
          const inputValue = inputAddSheet.current.value.trim()
          setSheets(prevSheets => new Set(prevSheets).add(inputValue.trim()))
@@ -51,11 +50,11 @@ function App() {
          inputAddSheet.current.value = ''
       }
    }
-   const handleSheetClick = (s:string) => {
+   const handleSheetClick = (s: string) => {
       let copy = s
       setCurrentSheet(copy)
    }
-   const deleteSheet = (s:string) =>
+   const deleteSheet = (s: string) =>
       setSheets(prevSheets => {
          prevSheets.delete(s)
          return new Set(prevSheets)

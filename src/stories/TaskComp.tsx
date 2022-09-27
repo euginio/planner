@@ -2,6 +2,7 @@ import classNames from 'classnames'
 import React, { useEffect, useRef } from 'react'
 import { DEBUGG_MODE } from '../App'
 import './Task.css'
+import { itemNavigationType } from './Sheet'
 
 const TaskComp = ({
    id,
@@ -13,8 +14,18 @@ const TaskComp = ({
    handlers,
    allowedActions,
    liHour,
+}: {
+   id: number
+   focus: boolean
+   text: string
+   done: boolean
+   size: number
+   impact: number
+   handlers: { [key: string]: (...a: any) => void }
+   allowedActions: itemNavigationType
+   liHour: number
 }) => {
-   const taskInputRef = useRef()
+   const taskInputRef = useRef<HTMLInputElement>(null)
 
    useEffect(() => {
       if (focus && taskInputRef?.current) taskInputRef.current.focus()
@@ -25,11 +36,11 @@ const TaskComp = ({
       if (size > 1) handlers.setSize(id, size - 1)
    }
    const updateText = () => {
-      handlers.setText(id, taskInputRef.current.value ? taskInputRef.current.value : '')
+      handlers.setText(id, taskInputRef.current?.value ? taskInputRef.current.value : '')
    }
    const swipeDone = () => handlers.setDone(id, !done)
 
-   const handleInputKeyDown = e => {
+   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLLIElement>) => {
       //['ctrlKey', 'shiftKey', 'altKey', 'metaKey']
       if (['Alt', 'Control'].includes(e.key)) {
          e.preventDefault() // prevents put prompt at begining
@@ -63,8 +74,7 @@ const TaskComp = ({
             onKeyDown={handleInputKeyDown}
          >
             <span className='hourLabel'>
-               {Number.parseInt(liHour)}:
-               {Number.isInteger(liHour) ? <>&nbsp;&nbsp;&nbsp;&nbsp;</> : '30'}
+               {liHour}:{Number.isInteger(liHour) ? <>&nbsp;&nbsp;&nbsp;&nbsp;</> : '30'}
                &nbsp;&nbsp;&nbsp;
             </span>
             <div

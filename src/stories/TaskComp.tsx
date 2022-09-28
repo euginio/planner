@@ -74,7 +74,8 @@ const TaskComp = ({
             onKeyDown={handleInputKeyDown}
          >
             <span className='hourLabel'>
-               {liHour}:{Number.isInteger(liHour) ? <>&nbsp;&nbsp;&nbsp;&nbsp;</> : '30'}
+               {Number.parseInt(liHour.toString())}:
+               {Number.isInteger(liHour) ? <>&nbsp;&nbsp;&nbsp;&nbsp;</> : '30'}
                &nbsp;&nbsp;&nbsp;
             </span>
             <div

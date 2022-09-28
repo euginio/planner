@@ -31,20 +31,20 @@ const List = ({
    isActive: boolean
    activateHandler: (a: string) => void
 }) => {
-   const [list, setList] = useState<Task[]>([])
-
-   const LS_LIST_KEY = useMemo(() => sheetName + '.' + name, [sheetName, name])
    const defaultNewTask: TaskI = useMemo(
       () => ({ focus: false, text: '', done: false, size: 1, impact: 1 }),
       []
    )
-   const listMovements = listConfig.listMovements
+   const LS_LIST_KEY = useMemo(() => sheetName + '.' + name, [sheetName, name])
+   let loadedList: Task[] = useMemo(() => {
+      let loadedListdd = JSON.parse(localStorage.getItem(LS_LIST_KEY) || '[]')
+      if (!loadedListdd.length) loadedListdd = [{ ...defaultNewTask, id: 1 }]
+      return loadedListdd
+   }, [])
 
-   useEffect(() => {
-      let loadedList: Task[] = JSON.parse(localStorage.getItem(LS_LIST_KEY) || '[]')
-      if (!loadedList.length) loadedList = [{ ...defaultNewTask, id: 1, focus: isActive }]
-      setList(loadedList)
-   }, [LS_LIST_KEY, isActive])
+   const [list, setList] = useState<Task[]>(loadedList)
+
+   const listMovements = listConfig.listMovements
 
    useEffect(() => {
       if (list.length) localStorage.setItem(LS_LIST_KEY, JSON.stringify(list))
@@ -124,7 +124,10 @@ const List = ({
    const addTask = (aboveId?: number, positions?: number, taskToAdd?: Task) => {
       setList(prevlist => {
          const maxTaskId = prevlist.length ? Math.max(...prevlist.map(t => t.id || -1)) : 0
-         let newTask = taskToAdd ? taskToAdd : { ...defaultNewTask, id: maxTaskId + 1, focus: true }
+         let newTask = {
+            ...(taskToAdd ? taskToAdd : { ...defaultNewTask, focus: true }),
+            id: maxTaskId + 1,
+         }
          let listcp = [...prevlist]
          if (aboveId) {
             listcp.find(t => t.id === aboveId)!.focus = false
@@ -156,7 +159,7 @@ const List = ({
    const promote = (id: number) => migrateToListById(id, -1, listMovements.promoteTo)
 
    const migrateToListById = (id: number, position: number, targetList?: string | null) => {
-      if (!targetList) return
+      if (targetList === undefined) return //null allowed as target list
       sheetHandlers.add([list.find(task => task.id === id)], targetList, position)
       remove(id)
    }

@@ -2,15 +2,16 @@
 // import { DEBUGG_MODE } from './App'
 // import clearCompleted from './clearCompletedTo'
 import { useState } from 'react'
-import List from './List'
+import List, { Task } from './List'
 import './Sheet.css'
+import TaskComp from './TaskComp'
 
 interface ListMovementType {
    clearCompletedTo?: string
    removeTo?: string | null
    postponeTo?: string
    promoteTo?: string
-   deleteAllTo?: string | null
+   removeAllTo?: string | null
 }
 
 export interface itemNavigationType {
@@ -27,7 +28,7 @@ export interface ListConf {
 }
 export interface TaskMovement {
    targetTaskList: string
-   tasksToMove: any[]
+   tasksToMove: Task[]
    position: number
 }
 function Sheet({ name }: { name: string }) {
@@ -89,7 +90,7 @@ function Sheet({ name }: { name: string }) {
          },
       },
       deleted: {
-         listMovements: { deleteAllTo: null },
+         listMovements: { removeAllTo: null },
          itemsNavigation: {
             add: false,
             editable: false,
@@ -103,10 +104,11 @@ function Sheet({ name }: { name: string }) {
 
    const [taskMovement, setTaskMovement] = useState<TaskMovement | any>()
    const [activeList, setActiveList] = useState(listNames[0])
+   // const [goal, SetGoal] = useState<string>()
 
    const sheetHandlers: { [key: string]: (...a: any) => void } = {
       taskMoved: () => setTaskMovement({}),
-      add: (items: string[], listName: string, position: number) =>
+      add: (items: Task[], listName: string, position: number = 0) =>
          setTaskMovement({ targetTaskList: listName, tasksToMove: items, position: position }),
       // focusedOnMe: taskListName => setTaskMovement(taskListName),
    }
@@ -125,10 +127,29 @@ function Sheet({ name }: { name: string }) {
          }
       }
    }
-
+   const goalActions: itemNavigationType = {
+      add: false,
+      editable: true,
+      completable: false,
+      sizeable: false,
+      sortable: false,
+   }
    return (
       <div onKeyDown={handleKeyDown}>
          <h2>Sheet {name}</h2>
+         <h3>
+            {/* <TaskComp
+               id={0}
+               focus={true}
+               handlers={{}}
+               text={goal || ''}
+               allowedActions={goalActions}
+               done={false}
+               size={1}
+               impact={1}
+               liHour={19}
+            ></TaskComp> */}
+         </h3>
          {Object.keys(listsConf).map(listName => (
             <List
                key={listName}

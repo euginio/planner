@@ -154,7 +154,10 @@ const List = ({
       focusDown: (id: number) => slideFocus(id, 1),
    }
 
-   const deleteItem = (id: number) => migrateToListById(id, 0, listMovements.removeTo)
+   const deleteItem = (id: number) => {
+      if (list.find(t => t.id === id)?.text) migrateToListById(id, 0, listMovements.removeTo)
+      else remove(id)
+   }
    const postpone = (id: number) => migrateToListById(id, 0, listMovements.postponeTo)
    const promote = (id: number) => migrateToListById(id, -1, listMovements.promoteTo)
 

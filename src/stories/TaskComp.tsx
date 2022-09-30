@@ -66,6 +66,8 @@ const TaskComp = ({
       }
    }
 
+   const currentHour = new Date().getHours() + new Date().getMinutes() / 60
+   const isInMyTimeRange = currentHour >= liHour && currentHour - liHour < size / 2
    return (
       <>
          <li
@@ -77,6 +79,14 @@ const TaskComp = ({
                {Number.parseInt(liHour.toString())}:
                {Number.isInteger(liHour) ? <>&nbsp;&nbsp;&nbsp;&nbsp;</> : '30'}
                &nbsp;&nbsp;&nbsp;
+               {isInMyTimeRange && (
+                  <span
+                     className={classNames({ currentHour: isInMyTimeRange })}
+                     style={{ float: 'left', marginTop: (currentHour - liHour) * 17 }}
+                  >
+                     {new Date().getHours()}:{new Date().getMinutes()}
+                  </span>
+               )}
             </span>
             <div
                className={classNames({ showSize: size > 1 })}

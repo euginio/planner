@@ -30,3 +30,7 @@
    width: 50px;
    display: inline-block;
 }
+
+.hourLabel .currentHour{
+   font-weight: bold;
+}

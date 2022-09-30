@@ -66,8 +66,11 @@ const TaskComp = ({
       }
    }
 
-   const currentHour = new Date().getHours() + new Date().getMinutes() / 60
-   const isInMyTimeRange = currentHour >= liHour && currentHour - liHour < size / 2
+   const minutes = new Date().getMinutes()
+   const hours = new Date().getHours()
+   const currentHour = hours + minutes / 60
+   const hoursPassed = currentHour - liHour
+   const isInMyTimeRange = currentHour >= liHour && hoursPassed < size / 2
    return (
       <>
          <li
@@ -76,15 +79,25 @@ const TaskComp = ({
             onKeyDown={handleInputKeyDown}
          >
             <span className='hourLabel'>
-               {Number.parseInt(liHour.toString())}:
-               {Number.isInteger(liHour) ? <>&nbsp;&nbsp;&nbsp;&nbsp;</> : '30'}
-               &nbsp;&nbsp;&nbsp;
+               {(!isInMyTimeRange || (size > 1 && hoursPassed >= 0.5)) && (
+                  <>
+                     {Number.parseInt(liHour.toString())}:
+                     {Number.isInteger(liHour) ? <>&nbsp;&nbsp;&nbsp;&nbsp;</> : '30'}
+                     &nbsp;&nbsp;&nbsp;
+                  </>
+               )}
                {isInMyTimeRange && (
                   <span
-                     className={classNames({ currentHour: isInMyTimeRange })}
-                     style={{ float: 'left', marginTop: (currentHour - liHour) * 17 }}
+                     className={classNames('currentHour', {
+                        floatLeft: hoursPassed >= 0.5,
+                     })}
+                     style={{
+                        position: 'relative',
+                        top: (hoursPassed >= 1 ? hoursPassed : 0) * 1.4 + 'em',
+                     }}
                   >
-                     {new Date().getHours()}:{new Date().getMinutes()}
+                     {hours}:{minutes < 10 ? '0' : ''}
+                     {minutes}
                   </span>
                )}
             </span>

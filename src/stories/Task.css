@@ -34,3 +34,6 @@
 .hourLabel .currentHour{
    font-weight: bold;
 }
+.floatLeft{
+   float: left;
+}

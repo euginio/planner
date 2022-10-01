@@ -33,11 +33,12 @@ const List = ({
    isActive: boolean
    activateHandler: (a: string) => void
 }) => {
+   const listMovements = listConfig.listMovements
+
    const [list, setList] = useState<Task[]>([])
+   const [visible, setVisible] = useState<boolean>(!!listMovements.visible)
 
    const LS_LIST_KEY = useMemo(() => sheetName + '.' + name, [sheetName, name])
-
-   const listMovements = listConfig.listMovements
 
    useEffect(() => {
       let loadedList = JSON.parse(localStorage.getItem(LS_LIST_KEY) || '[]')
@@ -224,6 +225,7 @@ const List = ({
       listcp.find(i => i.id === id)!.focus = true
       setList(listcp)
    }
+   const toggleVisibility = () => setVisible(!visible)
 
    return (
       <div onKeyDown={handleInputKeyDown}>
@@ -233,12 +235,16 @@ const List = ({
             navigableHandlers={navigableHandlers}
             itemHandlers={itemHandlers}
             itemActions={listConfig.itemsNavigation}
+            visible={visible}
          ></NavigableList>
-         {listMovements.clearCompletedTo && (
+         {visible && listMovements.clearCompletedTo && (
             <button onClick={clearCompleted}>Clear complete</button>
          )}
+         {visible && listMovements.resetCompleted && (
+            <button onClick={resetCompleted}>Reset Completed</button>
+         )}
          {listMovements.copyAllTo && <button onClick={copyAllMarked}>Copy All</button>}
-         {listMovements.resetCompleted && <button onClick={resetCompleted}>Reset Completed</button>}
+         <button onClick={toggleVisibility}>{visible ? 'hide' : 'show'}</button>
       </div>
    )
 }

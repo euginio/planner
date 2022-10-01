@@ -7,6 +7,7 @@ import './Sheet.css'
 import TaskComp from './TaskComp'
 
 interface ListMovementType {
+   visible?: boolean
    resetCompleted?: boolean
    removeTo?: string | null
    postponeTo?: string
@@ -42,6 +43,7 @@ function Sheet({ name }: { name: string }) {
             clearCompletedTo: 'done',
             removeTo: 'deleted',
             postponeTo: 'backlog',
+            visible: true,
          },
          itemsNavigation: {
             add: true,
@@ -88,7 +90,7 @@ function Sheet({ name }: { name: string }) {
          },
       },
       microHabits: {
-         listMovements: { removeTo: null, resetCompleted: true },
+         listMovements: { removeTo: null, resetCompleted: true, visible: true },
          itemsNavigation: {
             add: true,
             editable: true,

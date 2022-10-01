@@ -8,12 +8,14 @@ const NavigableList = ({
    itemActions,
    list,
    itemHandlers,
+   visible,
 }: {
    name: string
    navigableHandlers: { [key: string]: (...a: any) => void }
    itemActions: itemNavigationType
    list: Task[]
    itemHandlers: { [key: string]: (...a: any) => void }
+   visible: boolean
 }) => {
    const handleNavigableInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (['Alt', 'Control'].includes(e.key)) {
@@ -63,6 +65,7 @@ const NavigableList = ({
             name={name}
             itemHandlers={itemHandlers}
             allowedActions={itemActions}
+            visible={visible}
          ></DummyList>
       </div>
    )

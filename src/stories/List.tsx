@@ -13,6 +13,8 @@ export interface Task extends TaskI {
    id: number
 }
 
+const defaultNewTask: TaskI = { focus: false, text: '', done: false, size: 1, impact: 1 }
+
 // @param {itemActions} determines the posible actions for this list (add, editable, navigable, completable, sizeable, sortable)
 const List = ({
    sheetName,
@@ -31,24 +33,21 @@ const List = ({
    isActive: boolean
    activateHandler: (a: string) => void
 }) => {
-   const defaultNewTask: TaskI = useMemo(
-      () => ({ focus: false, text: '', done: false, size: 1, impact: 1 }),
-      []
-   )
-   const LS_LIST_KEY = useMemo(() => sheetName + '.' + name, [sheetName, name])
-   let loadedList: Task[] = useMemo(() => {
-      let loadedListdd = JSON.parse(localStorage.getItem(LS_LIST_KEY) || '[]')
-      if (!loadedListdd.length) loadedListdd = [{ ...defaultNewTask, id: 1 }]
-      return loadedListdd
-   }, [])
+   const [list, setList] = useState<Task[]>([])
 
-   const [list, setList] = useState<Task[]>(loadedList)
+   const LS_LIST_KEY = useMemo(() => sheetName + '.' + name, [sheetName, name])
 
    const listMovements = listConfig.listMovements
 
    useEffect(() => {
+      let loadedList = JSON.parse(localStorage.getItem(LS_LIST_KEY) || '[]')
+      if (!loadedList.length) loadedList = [{ ...defaultNewTask, id: 1 }]
+      setList(loadedList)
+   }, [LS_LIST_KEY])
+
+   useEffect(() => {
       if (list.length) localStorage.setItem(LS_LIST_KEY, JSON.stringify(list))
-   }, [list, LS_LIST_KEY])
+   }, [list])
 
    useEffect(() => {
       if (!isActive) unFocusAll()

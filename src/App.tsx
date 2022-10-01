@@ -13,7 +13,7 @@ function App() {
       const loadedSheets = JSON.parse(localStorage.getItem(LS_SHEETS_KEY) || '[]')
       if (loadedSheets.length) {
          setSheets(new Set(loadedSheets))
-         setCurrentSheet('today')
+         setCurrentSheet(loadedSheets[0])
       }
    }, [])
 

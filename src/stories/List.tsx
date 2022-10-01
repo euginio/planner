@@ -174,6 +174,16 @@ const List = ({
       const listcp = [...list.filter(t => !t.done)]
       setList(listcp)
    }
+   const copyAllMarked = () => {
+      sheetHandlers.add(
+         list.filter(t => t.done).map(t => ({ ...t, done: false })),
+         listMovements.copyAllTo,
+         -1
+      )
+   }
+   const resetCompleted = () => {
+      setList(list.map(t => ({ ...t, done: false })))
+   }
 
    const exchange = (id: number, positions: number) => {
       const currentIndex = list.findIndex(t => t.id === id)
@@ -227,6 +237,8 @@ const List = ({
          {listMovements.clearCompletedTo && (
             <button onClick={clearCompleted}>Clear complete</button>
          )}
+         {listMovements.copyAllTo && <button onClick={copyAllMarked}>Copy All</button>}
+         {listMovements.resetCompleted && <button onClick={resetCompleted}>Reset Completed</button>}
       </div>
    )
 }

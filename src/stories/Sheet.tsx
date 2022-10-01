@@ -7,11 +7,13 @@ import './Sheet.css'
 import TaskComp from './TaskComp'
 
 interface ListMovementType {
-   clearCompletedTo?: string
+   resetCompleted?: boolean
    removeTo?: string | null
    postponeTo?: string
    promoteTo?: string
    removeAllTo?: string | null
+   copyAllTo?: string
+   clearCompletedTo?: string
 }
 
 export interface itemNavigationType {
@@ -66,16 +68,32 @@ function Sheet({ name }: { name: string }) {
          },
       },
       someday: {
-         listMovements: {
-            clearCompletedTo: 'done',
-            promoteTo: 'backlog',
-            removeTo: null,
-         },
+         listMovements: { clearCompletedTo: 'done', promoteTo: 'backlog', removeTo: null },
          itemsNavigation: {
             add: true,
             editable: true,
             completable: true,
             sizeable: true,
+            sortable: true,
+         },
+      },
+      fixed: {
+         listMovements: { removeTo: null, copyAllTo: 'todos' },
+         itemsNavigation: {
+            add: true,
+            editable: true,
+            completable: true,
+            sizeable: true,
+            sortable: true,
+         },
+      },
+      microHabits: {
+         listMovements: { removeTo: null, resetCompleted: true },
+         itemsNavigation: {
+            add: true,
+            editable: true,
+            completable: true,
+            sizeable: false,
             sortable: true,
          },
       },

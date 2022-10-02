@@ -1,0 +1,89 @@
+{
+   "todos": {
+      "listLook": { "visible": true, "lapse": "day", "showListInfo": false },
+      "listActions": {
+         "clearCompletedTo": "done",
+         "removeTo": "deleted",
+         "postponeTo": "backlog"
+      },
+      "itemsNavigation": {
+         "add": true,
+         "editable": true,
+
+         "completable": true,
+         "sizeable": true,
+         "sortable": true
+      }
+   },
+   "backlog": {
+      "listLook": {},
+      "listActions": {
+         "clearCompletedTo": "done",
+         "removeTo": "deleted",
+         "postponeTo": "someday",
+         "promoteTo": "todos"
+      },
+      "itemsNavigation": {
+         "add": true,
+         "editable": true,
+         "completable": true,
+         "sizeable": true,
+         "sortable": true
+      }
+   },
+   "someday": {
+      "listLook": {},
+      "listActions": { "clearCompletedTo": "done", "promoteTo": "backlog", "removeTo": null },
+      "itemsNavigation": {
+         "add": true,
+         "editable": true,
+         "completable": true,
+         "sizeable": true,
+         "sortable": true
+      }
+   },
+   "fixed": {
+      "listLook": {},
+      "listActions": { "removeTo": null, "copyAllTo": "todos" },
+      "itemsNavigation": {
+         "add": true,
+         "editable": true,
+         "completable": true,
+         "sizeable": true,
+         "sortable": true
+      }
+   },
+   "microHabits": {
+      "listLook": { "visible": true },
+      "listActions": { "removeTo": null, "resetCompleted": true },
+      "itemsNavigation": {
+         "add": true,
+         "editable": true,
+         "completable": true,
+         "sizeable": false,
+         "sortable": true
+      }
+   },
+   "done": {
+      "listLook": {},
+      "listActions": {},
+      "itemsNavigation": {
+         "add": false,
+         "editable": false,
+         "completable": true,
+         "sizeable": true,
+         "sortable": true
+      }
+   },
+   "deleted": {
+      "listLook": {},
+      "listActions": { "removeAllTo": null },
+      "itemsNavigation": {
+         "add": false,
+         "editable": false,
+         "completable": false,
+         "sizeable": false,
+         "sortable": false
+      }
+   }
+}

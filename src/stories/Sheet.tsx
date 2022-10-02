@@ -4,10 +4,9 @@
 import { useState } from 'react'
 import List, { Task } from './List'
 import './Sheet.css'
-import TaskComp from './TaskComp'
+import presetcon from './presetListConf.json'
 
 interface ListActionsType {
-   visible?: boolean
    resetCompleted?: boolean
    removeTo?: string | null
    postponeTo?: string
@@ -25,7 +24,14 @@ export interface itemNavigationType {
    sortable: boolean
 }
 
+export interface ListLook {
+   visible?: boolean
+   lapse?: 'day' | 'week' | 'month' | 'year'
+   showListInfo?: boolean
+}
+
 export interface ListConf {
+   listLook: ListLook
    listActions: ListActionsType
    itemsNavigation: itemNavigationType
 }
@@ -37,89 +43,8 @@ export interface TaskMovement {
 function Sheet({ name }: { name: string }) {
    // const listNames = ['todos', 'backlog', 'someday', 'done', 'deleted']
 
-   const listsConf: { [key: string]: ListConf } = {
-      todos: {
-         listActions: {
-            clearCompletedTo: 'done',
-            removeTo: 'deleted',
-            postponeTo: 'backlog',
-            visible: true,
-         },
-         itemsNavigation: {
-            add: true,
-            editable: true,
-
-            completable: true,
-            sizeable: true,
-            sortable: true,
-         },
-      },
-      backlog: {
-         listActions: {
-            clearCompletedTo: 'done',
-            removeTo: 'deleted',
-            postponeTo: 'someday',
-            promoteTo: 'todos',
-         },
-         itemsNavigation: {
-            add: true,
-            editable: true,
-            completable: true,
-            sizeable: true,
-            sortable: true,
-         },
-      },
-      someday: {
-         listActions: { clearCompletedTo: 'done', promoteTo: 'backlog', removeTo: null },
-         itemsNavigation: {
-            add: true,
-            editable: true,
-            completable: true,
-            sizeable: true,
-            sortable: true,
-         },
-      },
-      fixed: {
-         listActions: { removeTo: null, copyAllTo: 'todos' },
-         itemsNavigation: {
-            add: true,
-            editable: true,
-            completable: true,
-            sizeable: true,
-            sortable: true,
-         },
-      },
-      microHabits: {
-         listActions: { removeTo: null, resetCompleted: true, visible: true },
-         itemsNavigation: {
-            add: true,
-            editable: true,
-            completable: true,
-            sizeable: false,
-            sortable: true,
-         },
-      },
-      done: {
-         listActions: {},
-         itemsNavigation: {
-            add: false,
-            editable: false,
-            completable: true,
-            sizeable: true,
-            sortable: true,
-         },
-      },
-      deleted: {
-         listActions: { removeAllTo: null },
-         itemsNavigation: {
-            add: false,
-            editable: false,
-            completable: false,
-            sizeable: false,
-            sortable: false,
-         },
-      },
-   }
+   const PresetlistsConf: { [key: string]: ListConf } = presetcon as { [key: string]: ListConf }
+   const listsConf: { [key: string]: ListConf } = PresetlistsConf
    const listNames = Object.keys(listsConf)
 
    const [taskMovement, setTaskMovement] = useState<TaskMovement | any>()
@@ -147,13 +72,13 @@ function Sheet({ name }: { name: string }) {
          }
       }
    }
-   const goalActions: itemNavigationType = {
-      add: false,
-      editable: true,
-      completable: false,
-      sizeable: false,
-      sortable: false,
-   }
+   // const goalActions: itemNavigationType = {
+   //    add: false,
+   //    editable: true,
+   //    completable: false,
+   //    sizeable: false,
+   //    sortable: false,
+   // }
    return (
       <div onKeyDown={handleKeyDown}>
          <h2>Sheet {name}</h2>

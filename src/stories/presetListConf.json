@@ -1,6 +1,6 @@
 {
    "todos": {
-      "listLook": { "visible": true, "lapse": "day", "showListInfo": false },
+      "listLook": { "visible": true, "lapse": "day", "showLapseName": true, "showListInfo": false },
       "listActions": {
          "clearCompletedTo": "done",
          "removeTo": "deleted",
@@ -9,10 +9,10 @@
       "itemsNavigation": {
          "add": true,
          "editable": true,
-
          "completable": true,
          "sizeable": true,
-         "sortable": true
+         "sortable": true,
+         "indentable":true
       }
    },
    "backlog": {
@@ -28,7 +28,8 @@
          "editable": true,
          "completable": true,
          "sizeable": true,
-         "sortable": true
+         "sortable": true,
+         "indentable":true
       }
    },
    "someday": {
@@ -39,18 +40,20 @@
          "editable": true,
          "completable": true,
          "sizeable": true,
-         "sortable": true
+         "sortable": true,
+         "indentable":true
       }
    },
    "fixed": {
-      "listLook": {},
+      "listLook": {"lapse": "day"},
       "listActions": { "removeTo": null, "copyAllTo": "todos" },
       "itemsNavigation": {
          "add": true,
          "editable": true,
          "completable": true,
          "sizeable": true,
-         "sortable": true
+         "sortable": true,
+         "indentable":true
       }
    },
    "microHabits": {
@@ -61,7 +64,8 @@
          "editable": true,
          "completable": true,
          "sizeable": false,
-         "sortable": true
+         "sortable": true,
+         "indentable":false
       }
    },
    "done": {
@@ -72,7 +76,8 @@
          "editable": false,
          "completable": true,
          "sizeable": true,
-         "sortable": true
+         "sortable": true,
+         "indentable":false
       }
    },
    "deleted": {
@@ -83,7 +88,8 @@
          "editable": false,
          "completable": false,
          "sizeable": false,
-         "sortable": false
+         "sortable": false,
+         "indentable":false
       }
    }
 }

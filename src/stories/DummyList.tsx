@@ -25,7 +25,9 @@ const DummyList = ({
    return (
       <>
          <h3 style={{ display: 'inline' }}>
-            {listConfig.listLook.lapse === 'day' ? weekday : name}
+            {listConfig.listLook.lapse === 'day' && listConfig.listLook.showLapseName
+               ? weekday
+               : name}
          </h3>
          {visible && listConfig.listLook.showListInfo && DEBUGG_MODE && (
             <ListInfo list={list}></ListInfo>
@@ -39,7 +41,7 @@ const DummyList = ({
                         {...t}
                         handlers={itemHandlers}
                         allowedActions={listConfig.itemsNavigation}
-                        liHour={liHour}
+                        {...(listConfig.listLook.lapse ? { liHour: liHour } : {})}
                      ></TaskComp>
                   )
                   liHour += t.size * 0.5

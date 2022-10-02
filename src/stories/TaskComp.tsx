@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react'
 import { DEBUGG_MODE } from '../App'
 import './Task.css'
 import { itemNavigationType } from './Sheet'
+import { HourPoint } from './HourPoint'
 
 const TaskComp = ({
    id,
@@ -10,6 +11,7 @@ const TaskComp = ({
    text = '',
    done = false,
    size = 1,
+   indentation = 0,
    impact = 1,
    handlers,
    allowedActions,
@@ -20,10 +22,11 @@ const TaskComp = ({
    text: string
    done: boolean
    size: number
+   indentation: number
    impact: number
    handlers: { [key: string]: (...a: any) => void }
    allowedActions: itemNavigationType
-   liHour: number
+   liHour?: number
 }) => {
    const taskInputRef = useRef<HTMLInputElement>(null)
 
@@ -31,6 +34,8 @@ const TaskComp = ({
       if (focus && taskInputRef?.current) taskInputRef.current.focus()
    }, [focus, allowedActions])
 
+   const increaseIndentation = () => handlers.setIndentation(id, indentation + 1)
+   const decreaseIndentation = () => handlers.setIndentation(id, indentation - 1)
    const increaseSize = () => handlers.setSize(id, size + 1)
    const decreaseSize = () => {
       if (size > 1) handlers.setSize(id, size - 1)
@@ -52,6 +57,14 @@ const TaskComp = ({
             e.stopPropagation()
          }
       }
+      if (allowedActions.indentable) {
+         if (e.key === 'Tab') {
+            if (e.shiftKey) decreaseIndentation()
+            else increaseIndentation()
+            e.preventDefault()
+            e.stopPropagation()
+         }
+      }
       if (e.ctrlKey && allowedActions.sizeable) {
          if (e.key === 'ArrowUp') {
             increaseSize()
@@ -66,11 +79,6 @@ const TaskComp = ({
       }
    }
 
-   const minutes = new Date().getMinutes()
-   const hours = new Date().getHours()
-   const currentHour = hours + minutes / 60
-   const hoursPassed = currentHour - liHour
-   const isInMyTimeRange = currentHour >= liHour && hoursPassed < size / 2
    return (
       <>
          <li
@@ -78,32 +86,13 @@ const TaskComp = ({
             onClick={() => handlers.handleOnItemClick(id)}
             onKeyDown={handleInputKeyDown}
          >
-            <span className='hourLabel'>
-               {(!isInMyTimeRange || (size > 1 && hoursPassed >= 0.5)) && (
-                  <>
-                     {Number.parseInt(liHour.toString())}:
-                     {Number.isInteger(liHour) ? <>&nbsp;&nbsp;&nbsp;&nbsp;</> : '30'}
-                     &nbsp;&nbsp;&nbsp;
-                  </>
-               )}
-               {isInMyTimeRange && (
-                  <span
-                     className={classNames('currentHour', {
-                        floatLeft: hoursPassed >= 0.5,
-                     })}
-                     style={{
-                        position: 'relative',
-                        top: (hoursPassed >= 1 ? hoursPassed : 0) * 1.4 + 'em',
-                     }}
-                  >
-                     {hours}:{minutes < 10 ? '0' : ''}
-                     {minutes}
-                  </span>
-               )}
-            </span>
+            {liHour && <HourPoint hour={liHour} size={size}></HourPoint>}
             <div
-               className={classNames({ showSize: size > 1 })}
-               style={{ height: 20 * size + 'px', display: 'inline-block', width: '90%' }}
+               className={classNames('task', { showSize: size > 1 })}
+               style={{
+                  left: 20 * indentation,
+                  height: 20 * size,
+               }}
             >
                {focus ? (
                   <input

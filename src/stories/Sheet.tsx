@@ -22,12 +22,14 @@ export interface itemNavigationType {
    completable: boolean
    sizeable: boolean
    sortable: boolean
+   indentable: boolean
 }
 
 export interface ListLook {
-   visible?: boolean
    lapse?: 'day' | 'week' | 'month' | 'year'
+   visible?: boolean
    showListInfo?: boolean
+   showLapseName?: boolean
 }
 
 export interface ListConf {

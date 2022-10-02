@@ -8,12 +8,20 @@ export interface TaskI {
    done: boolean
    size: number
    impact: number
+   indentation: number
 }
 export interface Task extends TaskI {
    id: number
 }
 
-const defaultNewTask: TaskI = { focus: false, text: '', done: false, size: 1, impact: 1 }
+const defaultNewTask: TaskI = {
+   focus: false,
+   text: '',
+   done: false,
+   size: 1,
+   impact: 1,
+   indentation: 1,
+}
 
 // @param {itemActions} determines the posible actions for this list (add, editable, navigable, completable, sizeable, sortable)
 const List = ({
@@ -112,6 +120,7 @@ const List = ({
    }
 
    const itemHandlers: { [key: string]: (...a: any) => void } = {
+      setIndentation: (id: number, value: number) => setItemAttr(id, 'indentation', value),
       setSize: (id: number, value: number) => setItemAttr(id, 'size', value),
       setText: (id: number, value: string) => setItemAttr(id, 'text', value),
       setDone: (id: number, value: boolean) => setItemAttr(id, 'done', value),

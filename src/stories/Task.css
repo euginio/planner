@@ -1,3 +1,8 @@
+.task{
+   display: inline-block;
+   width: 90%;
+   position: relative;
+}
 
 .taskInput{
    width:100%

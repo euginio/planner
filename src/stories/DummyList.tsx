@@ -1,28 +1,35 @@
 import { DEBUGG_MODE } from '../App'
 import TaskComp from './TaskComp'
-import TaskInfo from './TaskInfo'
+import ListInfo from './TaskInfo'
 import './DummyList.css'
 import { Task } from './List'
-import { itemNavigationType } from './Sheet'
+import { ListConf } from './Sheet'
 
 const DummyList = ({
    list,
    name,
    itemHandlers,
-   allowedActions,
+   listConfig,
    visible,
 }: {
    list: Task[]
    name: string
    itemHandlers: { [key: string]: (...a: any) => void }
-   allowedActions: itemNavigationType
+   listConfig: ListConf
    visible: boolean
 }) => {
    let liHour = 8.5
+   const weekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][
+      new Date().getDay()
+   ]
    return (
       <>
-         <h3 style={{ display: 'inline' }}>{name}</h3>
-         {visible && DEBUGG_MODE && <TaskInfo tasks={list}></TaskInfo>}
+         <h3 style={{ display: 'inline' }}>
+            {listConfig.listLook.lapse === 'day' ? weekday : name}
+         </h3>
+         {visible && listConfig.listLook.showListInfo && DEBUGG_MODE && (
+            <ListInfo list={list}></ListInfo>
+         )}
          {visible && (
             <ol>
                {list.map(t => {
@@ -31,7 +38,7 @@ const DummyList = ({
                         key={t.id}
                         {...t}
                         handlers={itemHandlers}
-                        allowedActions={allowedActions}
+                        allowedActions={listConfig.itemsNavigation}
                         liHour={liHour}
                      ></TaskComp>
                   )

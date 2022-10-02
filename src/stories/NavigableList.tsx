@@ -1,22 +1,23 @@
 import DummyList from './DummyList'
 import { Task } from './List'
-import { itemNavigationType } from './Sheet'
+import { ListConf } from './Sheet'
 
 const NavigableList = ({
    name,
    navigableHandlers,
-   itemActions,
+   listConfig,
    list,
    itemHandlers,
    visible,
 }: {
    name: string
    navigableHandlers: { [key: string]: (...a: any) => void }
-   itemActions: itemNavigationType
+   listConfig: ListConf
    list: Task[]
    itemHandlers: { [key: string]: (...a: any) => void }
    visible: boolean
 }) => {
+   const itemActions = listConfig.itemsNavigation
    const handleNavigableInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (['Alt', 'Control'].includes(e.key)) {
          e.preventDefault() // prevents put prompt at begining
@@ -64,7 +65,7 @@ const NavigableList = ({
             list={list}
             name={name}
             itemHandlers={itemHandlers}
-            allowedActions={itemActions}
+            listConfig={listConfig}
             visible={visible}
          ></DummyList>
       </div>

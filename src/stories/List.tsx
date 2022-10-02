@@ -36,7 +36,7 @@ const List = ({
    const listActions = listConfig.listActions
 
    const [list, setList] = useState<Task[]>([])
-   const [visible, setVisible] = useState<boolean>(!!listActions.visible)
+   const [visible, setVisible] = useState<boolean>(!!listConfig.listLook.visible)
 
    const LS_LIST_KEY = useMemo(() => sheetName + '.' + name, [sheetName, name])
 
@@ -234,7 +234,7 @@ const List = ({
             name={name}
             navigableHandlers={navigableHandlers}
             itemHandlers={itemHandlers}
-            itemActions={listConfig.itemsNavigation}
+            listConfig={listConfig}
             visible={visible}
          ></NavigableList>
          {visible && listActions.clearCompletedTo && (

@@ -33,10 +33,10 @@ const List = ({
    isActive: boolean
    activateHandler: (a: string) => void
 }) => {
-   const listMovements = listConfig.listMovements
+   const listActions = listConfig.listActions
 
    const [list, setList] = useState<Task[]>([])
-   const [visible, setVisible] = useState<boolean>(!!listMovements.visible)
+   const [visible, setVisible] = useState<boolean>(!!listActions.visible)
 
    const LS_LIST_KEY = useMemo(() => sheetName + '.' + name, [sheetName, name])
 
@@ -77,7 +77,7 @@ const List = ({
       }
       const task = list.find(i => i.focus)!
       if (
-         listMovements.removeTo &&
+         listActions.removeTo &&
          (e.key === 'Backspace' || e.key === 'Delete') &&
          (e.altKey || !task.text)
       ) {
@@ -85,11 +85,11 @@ const List = ({
          e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
       }
       if (e.altKey) {
-         if (listMovements.postponeTo && e.key === 'ArrowRight') {
+         if (listActions.postponeTo && e.key === 'ArrowRight') {
             postpone(task.id)
             e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
          }
-         if (listMovements.promoteTo && e.key === 'ArrowLeft') {
+         if (listActions.promoteTo && e.key === 'ArrowLeft') {
             promote(task.id)
             e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
          }
@@ -155,11 +155,11 @@ const List = ({
    }
 
    const deleteItem = (id: number) => {
-      if (list.find(t => t.id === id)?.text) migrateToListById(id, 0, listMovements.removeTo)
+      if (list.find(t => t.id === id)?.text) migrateToListById(id, 0, listActions.removeTo)
       else remove(id)
    }
-   const postpone = (id: number) => migrateToListById(id, 0, listMovements.postponeTo)
-   const promote = (id: number) => migrateToListById(id, -1, listMovements.promoteTo)
+   const postpone = (id: number) => migrateToListById(id, 0, listActions.postponeTo)
+   const promote = (id: number) => migrateToListById(id, -1, listActions.promoteTo)
 
    const migrateToListById = (id: number, position: number, targetList?: string | null) => {
       if (targetList === undefined) return //null allowed as target list
@@ -170,7 +170,7 @@ const List = ({
    const clearCompleted = () => {
       sheetHandlers.add(
          list.filter(t => t.done),
-         listMovements.clearCompletedTo
+         listActions.clearCompletedTo
       )
       const listcp = [...list.filter(t => !t.done)]
       setList(listcp)
@@ -178,7 +178,7 @@ const List = ({
    const copyAllMarked = () => {
       sheetHandlers.add(
          list.filter(t => t.done).map(t => ({ ...t, done: false })),
-         listMovements.copyAllTo,
+         listActions.copyAllTo,
          -1
       )
    }
@@ -237,13 +237,13 @@ const List = ({
             itemActions={listConfig.itemsNavigation}
             visible={visible}
          ></NavigableList>
-         {visible && listMovements.clearCompletedTo && (
+         {visible && listActions.clearCompletedTo && (
             <button onClick={clearCompleted}>Clear complete</button>
          )}
-         {visible && listMovements.resetCompleted && (
+         {visible && listActions.resetCompleted && (
             <button onClick={resetCompleted}>Reset Completed</button>
          )}
-         {listMovements.copyAllTo && <button onClick={copyAllMarked}>Copy All</button>}
+         {listActions.copyAllTo && <button onClick={copyAllMarked}>Copy All</button>}
          <button onClick={toggleVisibility}>{visible ? 'hide' : 'show'}</button>
       </div>
    )

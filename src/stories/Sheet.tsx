@@ -6,7 +6,7 @@ import List, { Task } from './List'
 import './Sheet.css'
 import TaskComp from './TaskComp'
 
-interface ListMovementType {
+interface ListActionsType {
    visible?: boolean
    resetCompleted?: boolean
    removeTo?: string | null
@@ -26,7 +26,7 @@ export interface itemNavigationType {
 }
 
 export interface ListConf {
-   listMovements: ListMovementType
+   listActions: ListActionsType
    itemsNavigation: itemNavigationType
 }
 export interface TaskMovement {
@@ -39,7 +39,7 @@ function Sheet({ name }: { name: string }) {
 
    const listsConf: { [key: string]: ListConf } = {
       todos: {
-         listMovements: {
+         listActions: {
             clearCompletedTo: 'done',
             removeTo: 'deleted',
             postponeTo: 'backlog',
@@ -55,7 +55,7 @@ function Sheet({ name }: { name: string }) {
          },
       },
       backlog: {
-         listMovements: {
+         listActions: {
             clearCompletedTo: 'done',
             removeTo: 'deleted',
             postponeTo: 'someday',
@@ -70,7 +70,7 @@ function Sheet({ name }: { name: string }) {
          },
       },
       someday: {
-         listMovements: { clearCompletedTo: 'done', promoteTo: 'backlog', removeTo: null },
+         listActions: { clearCompletedTo: 'done', promoteTo: 'backlog', removeTo: null },
          itemsNavigation: {
             add: true,
             editable: true,
@@ -80,7 +80,7 @@ function Sheet({ name }: { name: string }) {
          },
       },
       fixed: {
-         listMovements: { removeTo: null, copyAllTo: 'todos' },
+         listActions: { removeTo: null, copyAllTo: 'todos' },
          itemsNavigation: {
             add: true,
             editable: true,
@@ -90,7 +90,7 @@ function Sheet({ name }: { name: string }) {
          },
       },
       microHabits: {
-         listMovements: { removeTo: null, resetCompleted: true, visible: true },
+         listActions: { removeTo: null, resetCompleted: true, visible: true },
          itemsNavigation: {
             add: true,
             editable: true,
@@ -100,7 +100,7 @@ function Sheet({ name }: { name: string }) {
          },
       },
       done: {
-         listMovements: {},
+         listActions: {},
          itemsNavigation: {
             add: false,
             editable: false,
@@ -110,7 +110,7 @@ function Sheet({ name }: { name: string }) {
          },
       },
       deleted: {
-         listMovements: { removeAllTo: null },
+         listActions: { removeAllTo: null },
          itemsNavigation: {
             add: false,
             editable: false,

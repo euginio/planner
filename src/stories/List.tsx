@@ -244,7 +244,7 @@ const List = ({
    const toggleVisibility = () => setVisible(!visible)
 
    return (
-      <div onKeyDown={handleInputKeyDown}>
+      <div onKeyDown={handleInputKeyDown} className='itemList'>
          <NavigableList
             list={list}
             name={name}

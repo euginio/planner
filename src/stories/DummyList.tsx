@@ -33,7 +33,7 @@ const DummyList = ({
             <ListInfo list={list}></ListInfo>
          )}
          {visible && (
-            <ol>
+            <ol className='itemList'>
                {list.map(t => {
                   const renderr = (
                      <TaskComp

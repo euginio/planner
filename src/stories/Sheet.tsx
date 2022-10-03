@@ -97,18 +97,20 @@ function Sheet({ name }: { name: string }) {
                liHour={19}
             ></TaskComp> */}
          </h3>
-         {Object.keys(listsConf).map(listName => (
-            <List
-               key={listName}
-               name={listName}
-               sheetName={name}
-               listConfig={listsConf[listName]}
-               sheetHandlers={sheetHandlers}
-               taskMovement={taskMovement}
-               isActive={activeList === listName}
-               activateHandler={setActiveList}
-            ></List>
-         ))}
+         <div className='listContainer'>
+            {Object.keys(listsConf).map(listName => (
+               <List
+                  key={listName}
+                  name={listName}
+                  sheetName={name}
+                  listConfig={listsConf[listName]}
+                  sheetHandlers={sheetHandlers}
+                  taskMovement={taskMovement}
+                  isActive={activeList === listName}
+                  activateHandler={setActiveList}
+               ></List>
+            ))}
+         </div>
       </div>
    )
 }

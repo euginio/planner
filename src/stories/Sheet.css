@@ -25,3 +25,9 @@ ul.sheetList {
    background-color: #111111;
  }
 
+ .listContainer{
+   display: grid;
+   grid-template-columns: repeat(3, 1fr);
+   gap: 10px;
+   grid-auto-rows: minmax(100px, auto);
+ }

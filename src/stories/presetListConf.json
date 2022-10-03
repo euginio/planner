@@ -32,6 +32,18 @@
          "indentable":true
       }
    },
+   "microHabits": {
+      "listLook": { "visible": true },
+      "listActions": { "removeTo": null, "resetCompleted": true },
+      "itemsNavigation": {
+         "add": true,
+         "editable": true,
+         "completable": true,
+         "sizeable": false,
+         "sortable": true,
+         "indentable":true
+      }
+   },
    "someday": {
       "listLook": {},
       "listActions": { "clearCompletedTo": "done", "promoteTo": "backlog", "removeTo": null },
@@ -52,18 +64,6 @@
          "editable": true,
          "completable": true,
          "sizeable": true,
-         "sortable": true,
-         "indentable":true
-      }
-   },
-   "microHabits": {
-      "listLook": { "visible": true },
-      "listActions": { "removeTo": null, "resetCompleted": true },
-      "itemsNavigation": {
-         "add": true,
-         "editable": true,
-         "completable": true,
-         "sizeable": false,
          "sortable": true,
          "indentable":true
       }

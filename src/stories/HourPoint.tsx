@@ -37,7 +37,9 @@ export const HourPoint = ({ hour, size }: { hour: number; size: number }) => {
                })}
                style={{
                   position: 'relative',
-                  top: (hoursPassed >= 1 ? hoursPassed : 0) * 1.4 + 'em',
+                  // top: (hoursPassed >= 1 ? hoursPassed : 0) * 1.4 + 'em',
+                  // top: 20 * 2 * hoursPassed - 30,
+                  top: hoursPassed >= 1 ? hoursPassed * 43 - 43 : 0,
                }}
             >
                {hours}:{minutes < 10 ? '0' : ''}

@@ -1,8 +1,23 @@
 import classNames from 'classnames'
+import { useEffect, useState } from 'react'
 
 export const HourPoint = ({ hour, size }: { hour: number; size: number }) => {
-   const minutes = new Date().getMinutes()
-   const hours = new Date().getHours()
+   const init = new Date()
+   const [date, setDate] = useState(init)
+
+   const tick = () => {
+      setDate(new Date())
+   }
+
+   useEffect(() => {
+      const timerID = setInterval(() => tick(), 1000)
+      return () => {
+         clearInterval(timerID)
+      }
+   }, [])
+
+   const minutes = date.getMinutes()
+   const hours = date.getHours()
    const currentHour = hours + minutes / 60
    const hoursPassed = currentHour - hour
    const isInMyTimeRange = currentHour >= hour && hoursPassed < size / 2

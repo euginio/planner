@@ -20,7 +20,7 @@ const defaultNewTask: TaskI = {
    done: false,
    size: 1,
    impact: 1,
-   indentation: 1,
+   indentation: 0,
 }
 
 // @param {itemActions} determines the posible actions for this list (add, editable, navigable, completable, sizeable, sortable)
@@ -77,7 +77,6 @@ const List = ({
       }
    }, [taskMovement, name])
 
-   // clearCompletedTo, removeTo, postponeTo, promoteTo
    const handleInputKeyDown = (e: React.KeyboardEvent) => {
       if (['Alt', 'Control'].includes(e.key)) {
          e.preventDefault() // prevents put prompt at begining
@@ -85,7 +84,7 @@ const List = ({
       }
       const task = list.find(i => i.focus)!
       if (
-         listActions.removeTo &&
+         listActions.removeTo !== undefined &&
          (e.key === 'Backspace' || e.key === 'Delete') &&
          (e.altKey || !task.text)
       ) {
@@ -130,7 +129,7 @@ const List = ({
       },
    }
 
-   const addTask = (aboveId?: number, positions?: number, taskToAdd?: Task) => {
+   const addTask = (fromId?: number, positions: number = 1, taskToAdd?: Task) => {
       setList(prevlist => {
          const maxTaskId = prevlist.length ? Math.max(...prevlist.map(t => t.id || -1)) : 0
          let newTask = {
@@ -138,10 +137,14 @@ const List = ({
             id: maxTaskId + 1,
          }
          let listcp = [...prevlist]
-         if (aboveId) {
-            listcp.find(t => t.id === aboveId)!.focus = false
-            const aboveTaskIdx = listcp.findIndex(t => t.id === aboveId)
-            listcp.splice(aboveTaskIdx + (positions || 1), 0, newTask)
+         if (fromId) {
+            let fromTask = listcp.find(t => t.id === fromId)!
+            fromTask.focus = false
+            const aboveTaskIdx = listcp.findIndex(t => t.id === fromId)
+            listcp.splice(aboveTaskIdx + positions, 0, {
+               ...newTask,
+               indentation: fromTask.indentation,
+            })
          } else {
             listcp.unshift(newTask)
          }
@@ -186,7 +189,10 @@ const List = ({
    }
    const copyAllMarked = () => {
       sheetHandlers.add(
-         list.filter(t => t.done).map(t => ({ ...t, done: false })),
+         list
+            .filter(t => t.done)
+            .map(t => ({ ...t, done: false }))
+            .reverse(),
          listActions.copyAllTo,
          -1
       )
@@ -197,17 +203,18 @@ const List = ({
 
    const exchange = (id: number, positions: number) => {
       const currentIndex = list.findIndex(t => t.id === id)
-      const newIndexToMove = currentIndex + positions
-      if (list[newIndexToMove]) {
+      const targetIndexToMove = currentIndex + positions
+      const targetItem = list[targetIndexToMove]
+      if (targetItem) {
          const listcp = [...list]
          const currentItem = listcp.find(t => t.id === id)!
          //this swap items,
-         listcp[currentIndex] = listcp[newIndexToMove]
-         listcp[newIndexToMove] = currentItem
+         listcp[currentIndex] = targetItem
+         listcp[targetIndexToMove] = { ...currentItem, indentation: targetItem.indentation } //copy indentation of target item
          setList(listcp)
       } else {
-         if (newIndexToMove < 0) promote(id)
-         else if (newIndexToMove > list.length - 1) postpone(id)
+         if (targetIndexToMove < 0) promote(id)
+         else if (targetIndexToMove > list.length - 1) postpone(id)
       }
    }
    const isBottomItem = (id: number) => list.findIndex(t => t.id === id) === list.length - 1

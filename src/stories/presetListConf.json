@@ -65,7 +65,7 @@
          "completable": true,
          "sizeable": false,
          "sortable": true,
-         "indentable":false
+         "indentable":true
       }
    },
    "done": {

@@ -1,5 +1,8 @@
+import classNames from 'classnames'
 import { useState, useRef, useEffect, KeyboardEvent } from 'react'
 import Sheet from './stories/Sheet'
+import './App.css'
+
 export const DEBUGG_MODE = true
 
 function App() {
@@ -64,7 +67,7 @@ function App() {
       <div onKeyDown={handleGlobalInputKeyDown}>
          <ul className='sheetList'>
             {[...sheets].map(s => (
-               <li key={s}>
+               <li key={s} className={classNames({ currentSheet: currentSheet === s })}>
                   <a href='#' onClick={() => handleSheetClick(s)}>
                      {s}
                   </a>

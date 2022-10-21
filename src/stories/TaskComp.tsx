@@ -44,6 +44,8 @@ const TaskComp = ({
       handlers.setText(id, taskInputRef.current?.value ? taskInputRef.current.value : '')
    }
    const swipeDone = () => handlers.setDone(id, !done)
+   const toUpperCase = () => handlers.setText(id, text.toUpperCase())
+   const toLowerCase = () => handlers.setText(id, text.toLowerCase())
 
    const handleInputKeyDown = (e: React.KeyboardEvent<HTMLLIElement>) => {
       //['ctrlKey', 'shiftKey', 'altKey', 'metaKey']
@@ -73,6 +75,18 @@ const TaskComp = ({
          }
          if (e.key === 'ArrowDown') {
             decreaseSize()
+            e.preventDefault()
+            e.stopPropagation()
+         }
+      }
+      if (e.shiftKey) {
+         if (e.key === 'ArrowUp') {
+            toUpperCase()
+            e.preventDefault()
+            e.stopPropagation()
+         }
+         if (e.key === 'ArrowDown') {
+            toLowerCase()
             e.preventDefault()
             e.stopPropagation()
          }

@@ -1,6 +1,10 @@
 {
    "todos": {
-      "listLook": { "visible": true, "lapse": "day", "showLapseName": true, "showListInfo": false },
+      "listLook": { 
+         "visible": true, 
+         "showLapseName": true, 
+         "showListInfo": false 
+      },
       "listActions": {
          "clearCompletedTo": "done",
          "removeTo": "deleted",
@@ -18,7 +22,7 @@
    "backlog": {
       "listLook": {},
       "listActions": {
-         "clearCompletedTo": "done",
+         "clearCompletedTo": null,
          "removeTo": "deleted",
          "postponeTo": "someday",
          "promoteTo": "todos"
@@ -46,7 +50,7 @@
    },
    "someday": {
       "listLook": {},
-      "listActions": { "clearCompletedTo": "done", "promoteTo": "backlog", "removeTo": null },
+      "listActions": { "clearCompletedTo": null, "promoteTo": "backlog", "removeTo": null },
       "itemsNavigation": {
          "add": true,
          "editable": true,

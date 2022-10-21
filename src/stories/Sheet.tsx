@@ -1,6 +1,3 @@
-// import { useState } from 'react'
-// import { DEBUGG_MODE } from './App'
-// import clearCompleted from './clearCompletedTo'
 import { useState } from 'react'
 import List, { Task } from './List'
 import './Sheet.css'
@@ -13,7 +10,7 @@ interface ListActionsType {
    promoteTo?: string
    removeAllTo?: string | null
    copyAllTo?: string
-   clearCompletedTo?: string
+   clearCompletedTo?: string | null
 }
 
 export interface itemNavigationType {
@@ -55,8 +52,8 @@ function Sheet({ name }: { name: string }) {
 
    const sheetHandlers: { [key: string]: (...a: any) => void } = {
       taskMoved: () => setTaskMovement({}),
-      add: (items: Task[], listName: string, position: number = 0) =>
-         setTaskMovement({ targetTaskList: listName, tasksToMove: items, position: position }),
+      add: (items: Task[], targetTaskList: string, position: number = 0) =>
+         setTaskMovement({ targetTaskList, tasksToMove: items, position }),
       // focusedOnMe: taskListName => setTaskMovement(taskListName),
    }
 

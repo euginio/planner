@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { helper } from '../helper'
 import NavigableList from './NavigableList'
 import { ListConf, TaskMovement } from './Sheet'
 
@@ -9,6 +10,7 @@ export interface TaskI {
    size: number
    impact: number
    indentation: number
+   parent?: TaskI
 }
 export interface Task extends TaskI {
    id: number
@@ -65,11 +67,10 @@ const List = ({
 
    useEffect(() => {
       if (taskMovement?.targetTaskList === name) {
-         //is a new task for me, adding it...
-         taskMovement.tasksToMove.forEach(t => {
+         //are new tasks for me, adding it...
+         let id: number | undefined = undefined
+         taskMovement.tasksToMove.reverse().forEach(t => {
             // taskMovement.position: -1 = last; 0 = first; other = that position
-            let id = undefined
-            if (taskMovement.position === -1) id = list[list.length - 1].id
             if (taskMovement.position > 0) id = list[taskMovement.position].id
             addTask(id, 1, t)
          })
@@ -129,11 +130,18 @@ const List = ({
       },
    }
 
-   const addTask = (fromId?: number, positions: number = 1, taskToAdd?: Task) => {
+   const addTask = (fromId?: number, positions: number = 1, taskToAdd?: TaskI) => {
       setList(prevlist => {
          const maxTaskId = prevlist.length ? Math.max(...prevlist.map(t => t.id || -1)) : 0
          let newTask = {
-            ...(taskToAdd ? taskToAdd : { ...defaultNewTask, focus: true }),
+            ...(taskToAdd
+               ? {
+                    ...taskToAdd,
+                    indentation: taskToAdd.parent
+                       ? taskToAdd.parent.indentation + 1
+                       : taskToAdd.indentation,
+                 }
+               : { ...defaultNewTask, focus: true }),
             id: maxTaskId + 1,
          }
          let listcp = [...prevlist]
@@ -166,23 +174,28 @@ const List = ({
       focusDown: (id: number) => slideFocus(id, 1),
    }
 
-   const deleteItem = (id: number) => {
-      if (list.find(t => t.id === id)?.text) migrateToListById(id, 0, listActions.removeTo)
-      else remove(id)
-   }
+   const deleteItem = (id: number) => migrateToListById(id, 0, listActions.removeTo)
    const postpone = (id: number) => migrateToListById(id, 0, listActions.postponeTo)
    const promote = (id: number) => migrateToListById(id, -1, listActions.promoteTo)
 
    const migrateToListById = (id: number, position: number, targetList?: string | null) => {
       if (targetList === undefined) return //null allowed as target list
-      sheetHandlers.add([list.find(task => task.id === id)], targetList, position)
+      const taskToMove = list.find(task => task.id === id)
+      if (taskToMove?.text) sheetHandlers.add([taskToMove], targetList, position)
       remove(id)
    }
 
    const clearCompleted = () => {
+      if (listActions.clearCompletedTo === undefined) return //null allowed as target list
+      const parentLabel = helper.getWeekDay() + ' ' + new Date().toLocaleDateString()
+      const parentTask = { ...defaultNewTask, text: parentLabel }
       sheetHandlers.add(
-         list.filter(t => t.done),
-         listActions.clearCompletedTo
+         [
+            parentTask,
+            ...list.filter(t => t.done).map(t => ({ ...t, parent: parentTask, done: false })),
+         ],
+         listActions.clearCompletedTo,
+         -1
       )
       const listcp = [...list.filter(t => !t.done)]
       setList(listcp)

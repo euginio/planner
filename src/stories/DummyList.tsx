@@ -4,6 +4,7 @@ import ListInfo from './TaskInfo'
 import './DummyList.css'
 import { Task } from './List'
 import { ListConf } from './Sheet'
+import { helper } from '../helper'
 
 const DummyList = ({
    list,
@@ -18,15 +19,13 @@ const DummyList = ({
    listConfig: ListConf
    visible: boolean
 }) => {
-   let liHour = 8.5
-   const weekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][
-      new Date().getDay()
-   ]
+   let liHour = 1
+
    return (
       <>
          <h3 style={{ display: 'inline' }}>
             {listConfig.listLook.lapse === 'day' && listConfig.listLook.showLapseName
-               ? weekday
+               ? helper.getWeekDay()
                : name}
          </h3>
          {visible && listConfig.listLook.showListInfo && DEBUGG_MODE && (

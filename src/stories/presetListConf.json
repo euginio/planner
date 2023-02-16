@@ -1,9 +1,9 @@
 {
    "todos": {
-      "listLook": { 
-         "visible": true, 
-         "showLapseName": true, 
-         "showListInfo": false 
+      "listLook": {
+         "visible": true,
+         "showLapseName": true,
+         "showListInfo": false
       },
       "listActions": {
          "clearCompletedTo": "done",
@@ -16,7 +16,7 @@
          "completable": true,
          "sizeable": true,
          "sortable": true,
-         "indentable":true
+         "indentable": true
       }
    },
    "backlog": {
@@ -33,7 +33,19 @@
          "completable": true,
          "sizeable": true,
          "sortable": true,
-         "indentable":true
+         "indentable": true
+      }
+   },
+   "fixed": {
+      "listLook": {},
+      "listActions": { "removeTo": null, "copyAllTo": "todos" },
+      "itemsNavigation": {
+         "add": true,
+         "editable": true,
+         "completable": true,
+         "sizeable": true,
+         "sortable": true,
+         "indentable": true
       }
    },
    "microHabits": {
@@ -45,7 +57,7 @@
          "completable": true,
          "sizeable": false,
          "sortable": true,
-         "indentable":true
+         "indentable": true
       }
    },
    "someday": {
@@ -57,19 +69,7 @@
          "completable": true,
          "sizeable": true,
          "sortable": true,
-         "indentable":true
-      }
-   },
-   "fixed": {
-      "listLook": {"lapse": "day"},
-      "listActions": { "removeTo": null, "copyAllTo": "todos" },
-      "itemsNavigation": {
-         "add": true,
-         "editable": true,
-         "completable": true,
-         "sizeable": true,
-         "sortable": true,
-         "indentable":true
+         "indentable": true
       }
    },
    "done": {
@@ -81,7 +81,7 @@
          "completable": true,
          "sizeable": true,
          "sortable": true,
-         "indentable":false
+         "indentable": false
       }
    },
    "deleted": {
@@ -93,7 +93,7 @@
          "completable": false,
          "sizeable": false,
          "sortable": false,
-         "indentable":false
+         "indentable": false
       }
    }
 }

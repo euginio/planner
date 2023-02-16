@@ -72,7 +72,7 @@ const List = ({
          taskMovement.tasksToMove.reverse().forEach(t => {
             // taskMovement.position: -1 = last; 0 = first; other = that position
             if (taskMovement.position > 0) id = list[taskMovement.position].id
-            addTask(id, 1, t)
+            addTask(id, !isNaN(taskMovement.position) ? taskMovement.position : 1, t)
          })
          sheetHandlers.taskMoved()
       }
@@ -154,7 +154,8 @@ const List = ({
                indentation: fromTask.indentation,
             })
          } else {
-            listcp.unshift(newTask)
+            if (positions === -1) listcp.push(newTask)
+            else listcp.unshift(newTask)
          }
          return listcp
       })

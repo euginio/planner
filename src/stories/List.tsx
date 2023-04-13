@@ -265,7 +265,7 @@ const List = ({
             navigableHandlers={navigableHandlers}
             itemHandlers={itemHandlers}
             listConfig={listConfig}
-            visible={visible}
+            visible={visible || isActive}
          ></NavigableList>
          {visible && listActions.clearCompletedTo && (
             <button onClick={clearCompleted}>Clear complete</button>

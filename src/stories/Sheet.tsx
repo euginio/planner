@@ -80,7 +80,7 @@ function Sheet({ name }: { name: string }) {
    // }
    return (
       <div onKeyDown={handleKeyDown}>
-         <h2>Sheet {name}</h2>
+         {/* <h2>Sheet {name}</h2> */}
          <h3>
             {/* <TaskComp
                id={0}

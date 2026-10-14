@@ -4,7 +4,7 @@ A keyboard-first React planner with task sheets stored in browser local storage.
 
 ## Requirements
 
-- Node.js 20 or newer
+- Node.js 22.12 or newer
 - npm
 
 ## Development

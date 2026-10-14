@@ -7,22 +7,23 @@ export const DEBUGG_MODE = true
 
 function App() {
    const [sheets, setSheets] = useState<Set<string>>(new Set())
+   const [sheetsLoaded, setSheetsLoaded] = useState(false)
    const [currentSheet, setCurrentSheet] = useState<string>()
    const LS_SHEETS_KEY = 'App.Sheets'
    const inputAddSheet = useRef<HTMLInputElement>(null)
 
    useEffect(() => {
-      // if (sheets.length > 0 && !currentSheet) setCurrentSheet(sheets[0])
       const loadedSheets = JSON.parse(localStorage.getItem(LS_SHEETS_KEY) || '[]')
       if (loadedSheets.length) {
          setSheets(new Set(loadedSheets))
          setCurrentSheet(loadedSheets[0])
       }
+      setSheetsLoaded(true)
    }, [])
 
    useEffect(() => {
-      if (sheets.size) localStorage.setItem(LS_SHEETS_KEY, JSON.stringify([...sheets]))
-   }, [sheets])
+      if (sheetsLoaded) localStorage.setItem(LS_SHEETS_KEY, JSON.stringify([...sheets]))
+   }, [sheets, sheetsLoaded])
 
    const handleGlobalInputKeyDown = (e: KeyboardEvent) => {
       if (['Alt', 'Control'].includes(e.key)) {

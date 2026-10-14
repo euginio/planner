@@ -47,6 +47,7 @@ const List = ({
    const listActions = listConfig.listActions
 
    const [list, setList] = useState<Task[]>([])
+   const [loadedListKey, setLoadedListKey] = useState<string>()
    const [visible, setVisible] = useState<boolean>(!!listConfig.listLook.visible)
 
    const LS_LIST_KEY = useMemo(() => sheetName + '.' + name, [sheetName, name])
@@ -54,12 +55,18 @@ const List = ({
    useEffect(() => {
       let loadedList = JSON.parse(localStorage.getItem(LS_LIST_KEY) || '[]')
       if (!loadedList.length) loadedList = [{ ...defaultNewTask, id: 1 }]
+      if (isActive && !loadedList.some((task: Task) => task.focus)) {
+         loadedList[0] = { ...loadedList[0], focus: true }
+      }
       setList(loadedList)
+      setLoadedListKey(LS_LIST_KEY)
    }, [LS_LIST_KEY])
 
    useEffect(() => {
-      if (list.length) localStorage.setItem(LS_LIST_KEY, JSON.stringify(list))
-   }, [list])
+      if (loadedListKey === LS_LIST_KEY) {
+         localStorage.setItem(LS_LIST_KEY, JSON.stringify(list))
+      }
+   }, [list, LS_LIST_KEY, loadedListKey])
 
    useEffect(() => {
       if (!isActive) unFocusAll()

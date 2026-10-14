@@ -1,0 +1,11 @@
+.taskItems {
+   display: flex;
+   flex-direction: column;
+   gap: 3px;
+   margin: 0;
+   padding: 0;
+}
+
+.taskItems:empty {
+   min-height: 18px;
+}

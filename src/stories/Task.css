@@ -1,15 +1,31 @@
 .task{
    display: inline-block;
-   width: 85%;
+   width: calc(100% - 52px);
    position: relative;
 }
 
 .taskInput{
-   width:100%
+   width: 100%;
+   min-height: 30px;
+   padding: 5px 8px;
+   border: 1px solid transparent;
+   border-radius: 7px;
+   outline: none;
+   background: transparent;
+   color: var(--ink, #1f3432);
+   font-size: 13px;
+   line-height: 1.45;
+   transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
 }
-.labeledInput{
-   border: none;
-   outline-width: 0;
+
+.taskInput:focus {
+   border-color: #c8dfd5;
+   background: #fbfefc;
+   box-shadow: 0 0 0 2px rgba(50, 117, 104, 0.06);
+}
+
+.taskInput::placeholder {
+   color: #9aa9a2;
 }
 /* .taskLabel{
 } */
@@ -20,25 +36,52 @@
 }
 
 .taskHolder{
-   min-height: 1em;
-   border-bottom: 0;
-   border-top: 0;
-   border-right: 0;
-   padding-top: 5px;
+   min-height: 34px;
+   padding: 2px 0;
    list-style-type: none;
 }
-.taskHolder .showSize{
-   border-left: groove;
+
+.taskHolder:hover {
+   border-radius: 7px;
+   background: #f8fbf8;
+}
+
+.taskLabel {
+   display: inline-block;
+   padding: 7px 8px;
+   color: #344a44;
+   font-size: 13px;
+   line-height: 1.45;
+   overflow-wrap: anywhere;
+   cursor: text;
+}
+
+.taskHolder .showSize {
+   border-left: 2px solid #8ab6a7;
+}
+
+.taskInput.crossOut,
+.taskLabel.crossOut {
+   color: #91a099;
 }
 
 .hourLabel {
-   width: 50px;
+   width: 44px;
    display: inline-block;
+   color: #8b9b94;
+   font-size: 10px;
+   font-variant-numeric: tabular-nums;
 }
 
 .hourLabel .currentHour{
    font-weight: bold;
+   color: #327568;
 }
 .floatLeft{
    float: left;
+}
+
+.labeledInput {
+   border: 1px solid transparent;
+   outline: none;
 }

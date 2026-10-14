@@ -112,6 +112,7 @@ const TaskComp = ({
                   <input
                      ref={taskInputRef}
                      readOnly={!allowedActions?.editable}
+                     placeholder={allowedActions?.editable && !text ? 'Write a task...' : undefined}
                      onChange={updateText}
                      value={text}
                      className={classNames('taskInput', {

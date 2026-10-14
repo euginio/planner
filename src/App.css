@@ -1,30 +1,235 @@
-ul.sheetList {
-   list-style-type: none;
-   margin: 0;
-   padding: 0;
-   overflow: hidden;
-   background-color: #333333;
- }
- 
- ul.sheetList li {
-   float: left;
- }
- 
- ul.sheetList li a {
-   display: block;
-   color: white;
-   text-align: center;
-   padding: 6px 8px 6px 8px;
-   text-decoration: none;
- }
- ul.sheetList li a.remove {
-   color:red;
- }
-
- ul.sheetList li a:hover {
-   background-color: #111111;
+:root {
+   --ink: #1f3432;
+   --muted: #70817b;
+   --surface: #ffffff;
+   --canvas: #f4f7f3;
+   --line: #e3ebe5;
+   --accent: #327568;
+   --accent-soft: #e8f3ee;
+   --shadow: 0 12px 32px rgba(33, 66, 57, 0.06);
 }
 
-.currentSheet a{
-   background-color: #8e8888;
+* {
+   box-sizing: border-box;
+}
+
+body {
+   min-width: 320px;
+   min-height: 100vh;
+   margin: 0;
+   background:
+      radial-gradient(ellipse at 10% 0%, rgba(219, 237, 225, 0.7), transparent 34rem),
+      var(--canvas);
+   color: var(--ink);
+   font-family: 'Segoe UI', 'Aptos', sans-serif;
+   -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+   font: inherit;
+}
+
+button {
+   color: inherit;
+}
+
+.appShell {
+   min-height: 100vh;
+}
+
+.appHeader {
+   display: flex;
+   min-height: 76px;
+   align-items: center;
+   justify-content: space-between;
+   gap: 24px;
+   padding: 12px clamp(20px, 5vw, 76px);
+   border-bottom: 1px solid rgba(218, 229, 220, 0.8);
+   background: rgba(255, 255, 255, 0.78);
+   backdrop-filter: blur(14px);
+}
+
+.brand {
+   display: inline-flex;
+   flex: 0 0 auto;
+   align-items: center;
+   gap: 10px;
+   color: var(--ink);
+   font-family: 'Segoe UI', 'Aptos Display', sans-serif;
+   font-size: 19px;
+   font-weight: 800;
+   letter-spacing: -0.7px;
+}
+
+.brandMark {
+   display: grid;
+   width: 34px;
+   height: 34px;
+   place-items: center;
+   border-radius: 11px;
+   background: var(--accent);
+   box-shadow: 0 5px 12px rgba(50, 117, 104, 0.2);
+   color: white;
+   font-size: 16px;
+}
+
+.sheetNavigation {
+   min-width: 0;
+}
+
+.sheetList {
+   display: flex;
+   align-items: center;
+   gap: 5px;
+   margin: 0;
+   padding: 0;
+   list-style: none;
+}
+
+.sheetList li {
+   display: flex;
+   align-items: center;
+   gap: 2px;
+}
+
+.sheetButton,
+.backButton {
+   min-height: 38px;
+   padding: 0 13px;
+   border: 0;
+   border-radius: 10px;
+   background: transparent;
+   color: #64756f;
+   cursor: pointer;
+   font-size: 13px;
+   font-weight: 600;
+   transition: background 150ms ease, color 150ms ease;
+}
+
+.sheetButton:hover,
+.backButton:hover {
+   background: #f1f6f2;
+   color: var(--ink);
+}
+
+.currentSheet .sheetButton {
+   background: var(--accent-soft);
+   color: var(--accent);
+}
+
+.removeSheet {
+   width: 27px;
+   height: 27px;
+   border: 0;
+   border-radius: 8px;
+   background: transparent;
+   color: #a66b66;
+   cursor: pointer;
+   font-size: 19px;
+   line-height: 1;
+   opacity: 0.55;
+}
+
+.removeSheet:hover {
+   background: #fff0ed;
+   opacity: 1;
+}
+
+.backButton {
+   color: var(--accent);
+}
+
+.newSheetItem input {
+   width: 130px;
+   height: 38px;
+   padding: 0 12px;
+   border: 1px solid var(--line);
+   border-radius: 10px;
+   outline: none;
+   background: white;
+   color: var(--ink);
+   font-size: 13px;
+   transition: border 150ms ease, box-shadow 150ms ease, width 150ms ease;
+}
+
+.newSheetItem input::placeholder {
+   color: #778a82;
+}
+
+.newSheetItem input:focus {
+   width: 170px;
+   border-color: #83b4a7;
+   box-shadow: 0 0 0 3px rgba(50, 117, 104, 0.1);
+}
+
+.appMain {
+   width: min(1440px, 100%);
+   margin: 0 auto;
+   padding: 46px clamp(20px, 5vw, 76px) 72px;
+}
+
+.welcomePanel {
+   max-width: 580px;
+   margin: clamp(50px, 13vh, 140px) auto;
+   text-align: center;
+}
+
+.eyebrow {
+   color: #668e80;
+   font-size: 10px;
+   font-weight: 700;
+   letter-spacing: 1.8px;
+}
+
+.welcomePanel h1,
+.boardHeading h1 {
+   margin: 14px 0 10px;
+   color: var(--ink);
+   font-family: 'Segoe UI', 'Aptos Display', sans-serif;
+   font-size: clamp(30px, 4vw, 46px);
+   font-weight: 700;
+   letter-spacing: -1.8px;
+   line-height: 1.14;
+}
+
+.welcomePanel p,
+.boardHeading p {
+   margin: 0;
+   color: var(--muted);
+   font-size: 15px;
+   line-height: 1.7;
+}
+
+.visuallyHidden {
+   position: absolute;
+   width: 1px;
+   height: 1px;
+   overflow: hidden;
+   clip: rect(0, 0, 0, 0);
+   white-space: nowrap;
+   clip-path: inset(50%);
+}
+
+@media (max-width: 680px) {
+   .appHeader {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 12px;
+      padding: 14px 18px;
+   }
+
+   .sheetNavigation {
+      width: 100%;
+      overflow-x: auto;
+      padding-bottom: 2px;
+   }
+
+   .sheetList {
+      width: max-content;
+   }
+
+   .appMain {
+      padding: 34px 16px 48px;
+   }
 }

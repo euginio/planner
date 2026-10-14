@@ -79,21 +79,12 @@ function Sheet({ name }: { name: string }) {
    //    sortable: false,
    // }
    return (
-      <div onKeyDown={handleKeyDown}>
-         {/* <h2>Sheet {name}</h2> */}
-         <h3>
-            {/* <TaskComp
-               id={0}
-               focus={true}
-               handlers={{}}
-               text={goal || ''}
-               allowedActions={goalActions}
-               done={false}
-               size={1}
-               impact={1}
-               liHour={19}
-            ></TaskComp> */}
-         </h3>
+      <div className='plannerBoard' onKeyDown={handleKeyDown}>
+         <header className='boardHeading'>
+            <span className='eyebrow'>YOUR WORKSPACE</span>
+            <h1>{name}</h1>
+            <p>Keep your next steps clear and your priorities in view.</p>
+         </header>
          <div className='listContainer'>
             {Object.keys(listsConf).map(listName => (
                <List

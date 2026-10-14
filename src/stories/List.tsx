@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { helper } from '../helper'
 import NavigableList from './NavigableList'
 import { ListConf, TaskMovement } from './Sheet'
+import './List.css'
 
 export interface TaskI {
    focus: boolean
@@ -258,7 +259,11 @@ const List = ({
    const toggleVisibility = () => setVisible(!visible)
 
    return (
-      <div onKeyDown={handleInputKeyDown} className='itemList'>
+      <section
+         onKeyDown={handleInputKeyDown}
+         className={`taskListPanel${isActive ? ' activeList' : ''}`}
+         aria-label={`${name} task list`}
+      >
          <NavigableList
             list={list}
             name={name}
@@ -275,7 +280,7 @@ const List = ({
          )}
          {listActions.copyAllTo && <button onClick={copyAllMarked}>Copy All</button>}
          <button onClick={toggleVisibility}>{visible ? 'hide' : 'show'}</button>
-      </div>
+      </section>
    )
 }
 

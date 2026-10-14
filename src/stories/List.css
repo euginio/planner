@@ -3,3 +3,53 @@
    grid-column: 1 / 3;
    grid-row: 1;
 }
+.taskListPanel {
+   min-width: 0;
+   padding: 18px 17px 14px;
+   overflow: hidden;
+   border: 1px solid var(--line, #e3ebe5);
+   border-radius: 16px;
+   background: var(--surface, #fff);
+   box-shadow: var(--shadow, 0 12px 32px rgba(33, 66, 57, 0.06));
+   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.taskListPanel:hover {
+   transform: translateY(-1px);
+   box-shadow: 0 15px 35px rgba(33, 66, 57, 0.09);
+}
+
+.taskListPanel.activeList {
+   border-color: #a9cec0;
+   box-shadow: 0 0 0 3px rgba(50, 117, 104, 0.06), var(--shadow, 0 12px 32px rgba(33, 66, 57, 0.06));
+}
+
+.taskListPanel h3 {
+   margin: 0 0 13px;
+   color: #35564e;
+   font-family: 'Segoe UI', 'Aptos Display', sans-serif;
+   font-size: 14px;
+   font-weight: 700;
+   letter-spacing: 0.1px;
+   text-transform: capitalize;
+}
+
+.taskListPanel button {
+   min-height: 30px;
+   margin: 8px 5px 0 0;
+   padding: 0 10px;
+   border: 1px solid var(--line, #e3ebe5);
+   border-radius: 8px;
+   background: #fbfdfb;
+   color: #5e756d;
+   cursor: pointer;
+   font-size: 11px;
+   font-weight: 600;
+   transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.taskListPanel button:hover {
+   border-color: #bad5ca;
+   background: var(--accent-soft, #e8f3ee);
+   color: var(--accent, #327568);
+}

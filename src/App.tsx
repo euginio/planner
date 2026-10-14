@@ -64,33 +64,76 @@ function App() {
       })
 
    return (
-      <div onKeyDown={handleGlobalInputKeyDown}>
-         <ul className='sheetList'>
-            {[...sheets].map(s => (
-               <li key={s} className={classNames({ currentSheet: currentSheet === s })}>
-                  <a href='#' onClick={() => handleSheetClick(s)}>
-                     {s}
-                  </a>
-                  {!currentSheet && (
-                     <a href='#' className='remove' onClick={() => deleteSheet(s)}>
-                        X
-                     </a>
+      <div className='appShell' onKeyDown={handleGlobalInputKeyDown}>
+         <header className='appHeader'>
+            <div className='brand'>
+               <span className='brandMark' aria-hidden='true'>
+                  P
+               </span>
+               <span>Daymark</span>
+            </div>
+            <nav className='sheetNavigation' aria-label='Plans'>
+               <ul className='sheetList'>
+                  {[...sheets].map(s => (
+                     <li key={s} className={classNames({ currentSheet: currentSheet === s })}>
+                        <button
+                           type='button'
+                           className='sheetButton'
+                           aria-current={currentSheet === s ? 'page' : undefined}
+                           onClick={() => handleSheetClick(s)}
+                        >
+                           {s}
+                        </button>
+                        {!currentSheet && (
+                           <button
+                              type='button'
+                              className='removeSheet'
+                              aria-label={`Delete ${s} plan`}
+                              onClick={() => deleteSheet(s)}
+                           >
+                              ×
+                           </button>
+                        )}
+                     </li>
+                  ))}
+                  {currentSheet ? (
+                     <li>
+                        <button
+                           type='button'
+                           className='backButton'
+                           onClick={() => setCurrentSheet(undefined)}
+                        >
+                           <span aria-hidden='true'>←</span> All plans
+                        </button>
+                     </li>
+                  ) : (
+                     <li className='newSheetItem'>
+                        <label className='visuallyHidden' htmlFor='new-plan'>
+                           New plan name
+                        </label>
+                        <input
+                           id='new-plan'
+                           type='text'
+                           ref={inputAddSheet}
+                           onKeyDown={handleInputKeyDown}
+                           placeholder='+ New plan'
+                        />
+                     </li>
                   )}
-               </li>
-            ))}
+               </ul>
+            </nav>
+         </header>
+         <main className='appMain'>
             {currentSheet ? (
-               <li onClick={() => setCurrentSheet(undefined)}>
-                  <a href='#'> {'<--'}</a>
-               </li>
+               <Sheet name={currentSheet}></Sheet>
             ) : (
-               <li>
-                  <a>
-                     <input type='text' ref={inputAddSheet} onKeyDown={handleInputKeyDown} />
-                  </a>
-               </li>
+               <section className='welcomePanel'>
+                  <span className='eyebrow'>MAKE SPACE FOR WHAT MATTERS</span>
+                  <h1>Your plans, in one calm place.</h1>
+                  <p>Create a plan to start organizing your tasks and ideas.</p>
+               </section>
             )}
-         </ul>
-         {currentSheet && <Sheet name={currentSheet}></Sheet>}
+         </main>
       </div>
    )
 }

@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 import TaskComp from './TaskComp'
 import { itemNavigationType } from './Sheet'
 
@@ -12,11 +13,11 @@ const allowedActions: itemNavigationType = {
 }
 
 const createHandlers = () => ({
-   setDone: jest.fn(),
-   setIndentation: jest.fn(),
-   setSize: jest.fn(),
-   setText: jest.fn(),
-   handleOnItemClick: jest.fn(),
+   setDone: vi.fn(),
+   setIndentation: vi.fn(),
+   setSize: vi.fn(),
+   setText: vi.fn(),
+   handleOnItemClick: vi.fn(),
 })
 
 const renderTask = (

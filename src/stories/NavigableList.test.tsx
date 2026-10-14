@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 import NavigableList from './NavigableList'
 import { Task } from './List'
 import { ListConf } from './Sheet'
@@ -38,13 +39,13 @@ const list: Task[] = [
 ]
 
 const createHandlers = () => ({
-   addTask: jest.fn(),
-   moveUp: jest.fn(),
-   moveDown: jest.fn(),
-   focusUp: jest.fn(),
-   focusDown: jest.fn(),
-   focusOnFirst: jest.fn(),
-   focusOnLast: jest.fn(),
+   addTask: vi.fn(),
+   moveUp: vi.fn(),
+   moveDown: vi.fn(),
+   focusUp: vi.fn(),
+   focusDown: vi.fn(),
+   focusOnFirst: vi.fn(),
+   focusOnLast: vi.fn(),
 })
 
 const renderNavigableList = (navigableHandlers = createHandlers()) => {
@@ -55,11 +56,11 @@ const renderNavigableList = (navigableHandlers = createHandlers()) => {
          listConfig={listConfig}
          list={list}
          itemHandlers={{
-            setDone: jest.fn(),
-            setIndentation: jest.fn(),
-            setSize: jest.fn(),
-            setText: jest.fn(),
-            handleOnItemClick: jest.fn(),
+            setDone: vi.fn(),
+            setIndentation: vi.fn(),
+            setSize: vi.fn(),
+            setText: vi.fn(),
+            handleOnItemClick: vi.fn(),
          }}
          visible
       />

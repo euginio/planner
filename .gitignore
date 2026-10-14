@@ -7,9 +7,11 @@
 
 # testing
 /coverage
+/storybook-static
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
@@ -23,4 +25,3 @@ yarn-debug.log*
 yarn-error.log*
 
 local*
-storybook-static

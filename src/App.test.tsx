@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import App from './App'
 
@@ -96,7 +96,7 @@ describe('App', () => {
       expect(localStorage.getItem('App.Sheets')).toBe('[]')
    })
 
-   it('moves a postponed task from todos to backlog', async () => {
+   it('moves the first and last todos tasks to backlog and keeps source focus', async () => {
       localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
       localStorage.setItem(
          'Today.todos',
@@ -105,6 +105,38 @@ describe('App', () => {
                id: 1,
                focus: true,
                text: 'Prepare presentation',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+            {
+               id: 2,
+               focus: false,
+               text: 'Keep this task',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+            {
+               id: 3,
+               focus: false,
+               text: 'Postpone last task',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+         ])
+      )
+      localStorage.setItem(
+         'Today.backlog',
+         JSON.stringify([
+            {
+               id: 1,
+               focus: false,
+               text: 'Existing backlog task',
                done: false,
                size: 1,
                impact: 1,
@@ -119,10 +151,96 @@ describe('App', () => {
 
       await waitFor(() => {
          const backlog = JSON.parse(localStorage.getItem('Today.backlog') || '[]')
-         expect(backlog.some((task: { text: string }) => task.text === 'Prepare presentation'))
-            .toBe(true)
+         expect(backlog.map((task: { text: string }) => task.text)).toEqual([
+            'Prepare presentation',
+            'Existing backlog task',
+         ])
       })
-      expect(JSON.parse(localStorage.getItem('Today.todos') || '[]')).toEqual([])
+      let todos = JSON.parse(localStorage.getItem('Today.todos') || '[]')
+      expect(todos.map((task: { text: string }) => task.text)).toEqual([
+         'Keep this task',
+         'Postpone last task',
+      ])
+      expect(screen.getByDisplayValue('Keep this task')).toHaveFocus()
+
+      fireEvent.click(screen.getByText('Postpone last task'))
+      fireEvent.keyDown(screen.getByDisplayValue('Postpone last task'), {
+         key: 'ArrowRight',
+         altKey: true,
+      })
+
+      await waitFor(() => {
+         const backlog = JSON.parse(localStorage.getItem('Today.backlog') || '[]')
+         expect(backlog.map((task: { text: string }) => task.text)).toEqual([
+            'Postpone last task',
+            'Prepare presentation',
+            'Existing backlog task',
+         ])
+      })
+      todos = JSON.parse(localStorage.getItem('Today.todos') || '[]')
+      expect(todos.map((task: { text: string }) => task.text)).toEqual(['Keep this task'])
+      expect(screen.getByDisplayValue('Keep this task')).toHaveFocus()
+   })
+
+   it('promotes the first backlog task and keeps focus on the remaining task', async () => {
+      localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
+      localStorage.setItem(
+         'Today.todos',
+         JSON.stringify([
+            {
+               id: 1,
+               focus: false,
+               text: 'Existing todos task',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+         ])
+      )
+      localStorage.setItem(
+         'Today.backlog',
+         JSON.stringify([
+            {
+               id: 1,
+               focus: false,
+               text: 'Promote this task',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+            {
+               id: 2,
+               focus: false,
+               text: 'Keep in backlog',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+         ])
+      )
+      render(<App />)
+
+      const backlogList = screen.getByRole('region', { name: 'backlog task list' })
+      fireEvent.click(within(backlogList).getByRole('button', { name: 'show' }))
+      fireEvent.click(await screen.findByText('Promote this task'))
+      const taskInput = screen.getByDisplayValue('Promote this task')
+      expect(taskInput).toHaveFocus()
+
+      fireEvent.keyDown(taskInput, { key: 'ArrowLeft', altKey: true })
+
+      await waitFor(() => {
+         const todos = JSON.parse(localStorage.getItem('Today.todos') || '[]')
+         expect(todos.map((task: { text: string }) => task.text)).toEqual([
+            'Existing todos task',
+            'Promote this task',
+         ])
+      })
+      const backlog = JSON.parse(localStorage.getItem('Today.backlog') || '[]')
+      expect(backlog.map((task: { text: string }) => task.text)).toEqual(['Keep in backlog'])
+      expect(screen.getByDisplayValue('Keep in backlog')).toHaveFocus()
    })
 
    it('archives completed tasks beneath a dated parent task', async () => {

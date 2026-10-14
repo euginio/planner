@@ -64,14 +64,23 @@ describe('TaskComp', () => {
    })
 
    it('indents and unindents with Tab and Shift+Tab', () => {
-      const { container, handlers } = renderTask()
+      const { container, handlers } = renderTask(createHandlers(), { indentation: 1 })
       const task = container.querySelector('li')!
 
       fireEvent.keyDown(task, { key: 'Tab' })
       fireEvent.keyDown(task, { key: 'Tab', shiftKey: true })
 
-      expect(handlers.setIndentation).toHaveBeenNthCalledWith(1, 1, 1)
-      expect(handlers.setIndentation).toHaveBeenNthCalledWith(2, 1, -1)
+      expect(handlers.setIndentation).toHaveBeenNthCalledWith(1, 1, 2)
+      expect(handlers.setIndentation).toHaveBeenNthCalledWith(2, 1, 0)
+   })
+
+   it('does not unindent a task beyond the left edge', () => {
+      const { container, handlers } = renderTask()
+      const task = container.querySelector('li')!
+
+      fireEvent.keyDown(task, { key: 'Tab', shiftKey: true })
+
+      expect(handlers.setIndentation).not.toHaveBeenCalled()
    })
 
    it('changes task size with Ctrl+ArrowUp and Ctrl+ArrowDown', () => {

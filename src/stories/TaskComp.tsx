@@ -35,7 +35,9 @@ const TaskComp = ({
    }, [focus, allowedActions])
 
    const increaseIndentation = () => handlers.setIndentation(id, indentation + 1)
-   const decreaseIndentation = () => handlers.setIndentation(id, indentation - 1)
+   const decreaseIndentation = () => {
+      if (indentation > 0) handlers.setIndentation(id, indentation - 1)
+   }
    const increaseSize = () => handlers.setSize(id, size + 1)
    const decreaseSize = () => {
       if (size > 1) handlers.setSize(id, size - 1)

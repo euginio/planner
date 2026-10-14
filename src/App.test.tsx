@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import App from './App'
 
@@ -94,5 +94,79 @@ describe('App', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Delete Today plan' }))
 
       expect(localStorage.getItem('App.Sheets')).toBe('[]')
+   })
+
+   it('moves a postponed task from todos to backlog', async () => {
+      localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
+      localStorage.setItem(
+         'Today.todos',
+         JSON.stringify([
+            {
+               id: 1,
+               focus: true,
+               text: 'Prepare presentation',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+         ])
+      )
+      render(<App />)
+
+      const taskInput = await screen.findByDisplayValue('Prepare presentation')
+      fireEvent.keyDown(taskInput, { key: 'ArrowRight', altKey: true })
+
+      await waitFor(() => {
+         const backlog = JSON.parse(localStorage.getItem('Today.backlog') || '[]')
+         expect(backlog.some((task: { text: string }) => task.text === 'Prepare presentation'))
+            .toBe(true)
+      })
+      expect(JSON.parse(localStorage.getItem('Today.todos') || '[]')).toEqual([])
+   })
+
+   it('archives completed tasks beneath a dated parent task', async () => {
+      localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
+      localStorage.setItem(
+         'Today.todos',
+         JSON.stringify([
+            {
+               id: 1,
+               focus: true,
+               text: 'Prepare presentation',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+            {
+               id: 2,
+               focus: false,
+               text: 'Review notes',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+         ])
+      )
+      render(<App />)
+
+      const taskInput = await screen.findByDisplayValue('Prepare presentation')
+      fireEvent.keyDown(taskInput, { key: 'Enter', altKey: true })
+      fireEvent.click(screen.getByRole('button', { name: 'Clear complete' }))
+
+      await waitFor(() => {
+         const archived = JSON.parse(localStorage.getItem('Today.done') || '[]')
+         const archivedTasks = archived.filter((task: { text: string }) => task.text)
+         expect(archivedTasks).toHaveLength(2)
+         expect(archivedTasks[1].text).toBe('Prepare presentation')
+      })
+      const remaining = JSON.parse(localStorage.getItem('Today.todos') || '[]')
+      expect(remaining.map((task: { text: string }) => task.text)).toEqual(['Review notes'])
+      const archived = JSON.parse(localStorage.getItem('Today.done') || '[]')
+      const archivedTasks = archived.filter((task: { text: string }) => task.text)
+      expect(archivedTasks[0].text).toMatch(/^\w+ \d{1,2}\/\d{1,2}\/\d{4}$/)
+      expect(archivedTasks[1]).toMatchObject({ done: false, indentation: 1 })
    })
 })

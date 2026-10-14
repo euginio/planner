@@ -28,3 +28,6 @@ jobs:
 
       - name: Build production app
         run: npm run build
+
+      - name: Build Storybook
+        run: npm run build-storybook

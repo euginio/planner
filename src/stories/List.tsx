@@ -75,9 +75,12 @@ const List = ({
 
    useEffect(() => {
       if (taskMovement?.targetTaskList === name) {
-         //are new tasks for me, adding it...
+         const tasksToMove =
+            taskMovement.position === 0
+               ? [...taskMovement.tasksToMove].reverse()
+               : taskMovement.tasksToMove
          let id: number | undefined = undefined
-         taskMovement.tasksToMove.reverse().forEach(t => {
+         tasksToMove.forEach(t => {
             // taskMovement.position: -1 = last; 0 = first; other = that position
             if (taskMovement.position > 0) id = list[taskMovement.position].id
             addTask(id, !isNaN(taskMovement.position) ? taskMovement.position : 1, t)

@@ -16,7 +16,7 @@ const NavigableList = ({
    list: Task[]
    itemHandlers: { [key: string]: (...a: any) => void }
    visible: boolean
-}) => {
+}) =>{
    const itemActions = listConfig.itemsNavigation
    const handleNavigableInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (['Alt', 'Control'].includes(e.key)) {

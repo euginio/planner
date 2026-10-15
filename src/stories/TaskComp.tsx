@@ -72,8 +72,8 @@ const TaskComp = ({
       if (!source || !target || source === target || source.parentElement !== target.parentElement)
          return
 
-      const targetId = Number(target.dataset.taskId)
       const targetRect = target.getBoundingClientRect()
+      const targetId = Number(target.dataset.taskId)
       handlers.reorderTask(id, targetId, e.clientY > targetRect.top + targetRect.height / 2)
    }
 
@@ -140,7 +140,7 @@ const TaskComp = ({
             onClick={() => handlers.handleOnItemClick(id)}
             onKeyDown={handleInputKeyDown}
          >
-            {allowedActions.sortable && (
+            {allowedActions.sortable && allowedActions.dragAndDrop !== false && (
                <button
                   type='button'
                   className='taskDragHandle'

@@ -20,6 +20,7 @@ export interface itemNavigationType {
    sizeable: boolean
    sortable: boolean
    indentable: boolean
+   dragAndDrop?: boolean
 }
 
 export interface ListLook {
@@ -46,12 +47,12 @@ function Sheet({ name }: { name: string }) {
    const listsConf: { [key: string]: ListConf } = PresetlistsConf
    const listNames = Object.keys(listsConf)
 
-   const [taskMovement, setTaskMovement] = useState<TaskMovement | any>()
+   const [taskMovement, setTaskMovement] = useState<TaskMovement | undefined>()
    const [activeList, setActiveList] = useState(listNames[0])
    // const [goal, SetGoal] = useState<string>()
 
    const sheetHandlers: { [key: string]: (...a: any) => void } = {
-      taskMoved: () => setTaskMovement({}),
+      taskMoved: () => setTaskMovement(undefined),
       add: (items: Task[], targetTaskList: string, position: number = 0) =>
          setTaskMovement({ targetTaskList, tasksToMove: items, position }),
       // focusedOnMe: taskListName => setTaskMovement(taskListName),

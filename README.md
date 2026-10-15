@@ -52,8 +52,10 @@ The currently active list stays visible. Click a task to focus it and activate
 its list. Lists that do not allow adding tasks, such as **done** and **deleted**,
 cannot create new tasks with Enter.
 On narrow screens, use the grip beside a task to drag it to another position in
-the same list. Cross-list drag-and-drop is not supported; moving a task between
-lists still requires the keyboard shortcuts below.
+the same list. **fixed** and **microHabits** do not support dragging or
+Alt+Right task moves.
+Cross-list drag-and-drop is not supported; move tasks between lists with the
+keyboard shortcuts below.
 
 ### Keyboard shortcuts
 

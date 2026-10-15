@@ -40,11 +40,15 @@ const List = ({
    name: string
    listConfig: ListConf
    sheetHandlers: { [key: string]: (...a: any) => void }
-   taskMovement: TaskMovement
+   taskMovement: TaskMovement | undefined
    isActive: boolean
    activateHandler: (a: string) => void
 }) => {
    const listActions = listConfig.listActions
+   const canPostpone =
+      !!listActions.postponeTo &&
+      !['fixed', 'microHabits'].includes(name) &&
+      !['fixed', 'microHabits'].includes(listActions.postponeTo)
 
    const [list, setList] = useState<Task[]>([])
    const [loadedListKey, setLoadedListKey] = useState<string>()
@@ -104,7 +108,7 @@ const List = ({
          e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
       }
       if (e.altKey) {
-         if (listActions.postponeTo && e.key === 'ArrowRight') {
+         if (canPostpone && e.key === 'ArrowRight') {
             postpone(task.id)
             e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
          }
@@ -198,7 +202,9 @@ const List = ({
    }
 
    const deleteItem = (id: number) => migrateToListById(id, 0, listActions.removeTo)
-   const postpone = (id: number) => migrateToListById(id, 0, listActions.postponeTo)
+   const postpone = (id: number) => {
+      if (canPostpone) migrateToListById(id, 0, listActions.postponeTo)
+   }
    const promote = (id: number) => migrateToListById(id, -1, listActions.promoteTo)
 
    const migrateToListById = (id: number, position: number, targetList?: string | null) => {

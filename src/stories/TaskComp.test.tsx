@@ -156,6 +156,14 @@ describe('TaskComp', () => {
       expect(screen.queryByRole('button', { name: 'Reorder Plan report' })).not.toBeInTheDocument()
    })
 
+   it('does not show a drag handle when drag and drop is disabled for the list', () => {
+      renderTask(createHandlers(), {
+         allowedActions: { ...allowedActions, dragAndDrop: false },
+      })
+
+      expect(screen.queryByRole('button', { name: 'Reorder Plan report' })).not.toBeInTheDocument()
+   })
+
    it('changes task size with Ctrl+ArrowUp and Ctrl+ArrowDown', () => {
       const { container, handlers } = renderTask(createHandlers(), { size: 2 })
       const task = container.querySelector('li')!

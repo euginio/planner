@@ -45,7 +45,8 @@
          "completable": true,
          "sizeable": true,
          "sortable": true,
-         "indentable": true
+         "indentable": true,
+         "dragAndDrop": false
       }
    },
    "microHabits": {
@@ -57,7 +58,8 @@
          "completable": true,
          "sizeable": false,
          "sortable": true,
-         "indentable": true
+         "indentable": true,
+         "dragAndDrop": false
       }
    },
    "someday": {

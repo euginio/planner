@@ -467,6 +467,80 @@ describe('App', () => {
       expect(screen.getByDisplayValue('Keep this task')).toHaveFocus()
    })
 
+   it.each(['fixed', 'microHabits'])(
+      'does not move a task from %s with Alt+ArrowRight',
+      async listName => {
+         localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
+         localStorage.setItem(
+            `Today.${listName}`,
+            JSON.stringify([
+               {
+                  id: 1,
+                  focus: false,
+                  text: 'Keep this task here',
+                  done: false,
+                  size: 1,
+                  impact: 1,
+                  indentation: 0,
+               },
+            ])
+         )
+         render(<App />)
+
+         const listPanel = screen.getByRole('region', { name: `${listName} task list` })
+         const showButton = within(listPanel).queryByRole('button', { name: 'show' })
+         if (showButton) fireEvent.click(showButton)
+         fireEvent.click(await within(listPanel).findByText('Keep this task here'))
+         const taskInput = await screen.findByDisplayValue('Keep this task here')
+
+         fireEvent.keyDown(taskInput, { key: 'ArrowRight', altKey: true })
+
+         await waitFor(() => {
+            expect(
+               JSON.parse(localStorage.getItem(`Today.${listName}`) || '[]').map(
+                  (task: { text: string }) => task.text
+               )
+            ).toEqual(['Keep this task here'])
+            expect(
+               JSON.parse(localStorage.getItem('Today.someday') || '[]').map(
+                  (task: { text: string }) => task.text
+               )
+            ).not.toContain('Keep this task here')
+         })
+      }
+   )
+
+   it.each(['fixed', 'microHabits'])(
+      'does not render drag handles in %s',
+      async listName => {
+         localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
+         localStorage.setItem(
+            `Today.${listName}`,
+            JSON.stringify([
+               {
+                  id: 1,
+                  focus: false,
+                  text: 'Task without drag',
+                  done: false,
+                  size: 1,
+                  impact: 1,
+                  indentation: 0,
+               },
+            ])
+         )
+         render(<App />)
+
+         const listPanel = screen.getByRole('region', { name: `${listName} task list` })
+         const showButton = within(listPanel).queryByRole('button', { name: 'show' })
+         if (showButton) fireEvent.click(showButton)
+         await within(listPanel).findByText('Task without drag')
+
+         expect(
+            within(listPanel).queryByRole('button', { name: 'Reorder Task without drag' })
+         ).not.toBeInTheDocument()
+      }
+   )
+
    it('promotes the first backlog task and keeps focus on the remaining task', async () => {
       localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
       localStorage.setItem(

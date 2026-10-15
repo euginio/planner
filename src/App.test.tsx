@@ -1,6 +1,16 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
+
+const emptyBackupLists = {
+   todos: [],
+   backlog: [],
+   fixed: [],
+   microHabits: [],
+   someday: [],
+   done: [],
+   deleted: [],
+}
 
 describe('App', () => {
    beforeEach(() => {
@@ -94,6 +104,156 @@ describe('App', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Delete Today plan' }))
 
       expect(localStorage.getItem('App.Sheets')).toBe('[]')
+   })
+
+   it('imports a backup, replacing matching plans and preserving other plans', async () => {
+      localStorage.setItem('App.Sheets', JSON.stringify(['Today', 'Later']))
+      localStorage.setItem(
+         'Today.todos',
+         JSON.stringify([
+            {
+               id: 1,
+               focus: false,
+               text: 'Old task',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+         ])
+      )
+      localStorage.setItem(
+         'Later.todos',
+         JSON.stringify([
+            {
+               id: 1,
+               focus: false,
+               text: 'Keep this task',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+         ])
+      )
+      const backupContent = JSON.stringify({
+         format: 'daymark-backup',
+         version: 1,
+         exportedAt: '2026-10-14T00:00:00.000Z',
+         plans: [
+            {
+               name: 'Today',
+               lists: {
+                  ...emptyBackupLists,
+                  todos: [
+                     {
+                        id: 1,
+                        focus: false,
+                        text: 'Restored task',
+                        done: false,
+                        size: 1,
+                        impact: 1,
+                        indentation: 0,
+                     },
+                  ],
+               },
+            },
+            { name: 'New plan', lists: { ...emptyBackupLists } },
+         ],
+      })
+      const backup = new File(
+         [backupContent],
+         'daymark-backup.json',
+         { type: 'application/json' }
+      )
+      Object.defineProperty(backup, 'text', {
+         value: async () => backupContent,
+      })
+      const { container } = render(<App />)
+
+      fireEvent.change(container.querySelector('input[type="file"]')!, {
+         target: { files: [backup] },
+      })
+
+      expect(await screen.findByRole('status')).toHaveTextContent(
+         'Matching plans were replaced; other plans were kept.'
+      )
+      expect(JSON.parse(localStorage.getItem('App.Sheets') || '[]')).toEqual([
+         'Today',
+         'Later',
+         'New plan',
+      ])
+      expect(JSON.parse(localStorage.getItem('Today.todos') || '[]')[0].text).toBe(
+         'Restored task'
+      )
+      expect(JSON.parse(localStorage.getItem('Later.todos') || '[]')[0].text).toBe(
+         'Keep this task'
+      )
+      expect(screen.getByRole('button', { name: 'New plan' })).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: 'Today' }))
+      expect(await screen.findByDisplayValue('Restored task')).toBeInTheDocument()
+   })
+
+   it('downloads a backup file when export is requested', async () => {
+      localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
+      const createObjectURL = vi.fn(() => 'blob:daymark-backup')
+      const revokeObjectURL = vi.fn()
+      vi.stubGlobal('URL', { createObjectURL, revokeObjectURL })
+      const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+
+      try {
+         render(<App />)
+         fireEvent.click(await screen.findByRole('button', { name: 'Export backup' }))
+
+         expect(createObjectURL).toHaveBeenCalledWith(expect.any(Blob))
+         expect(click).toHaveBeenCalledOnce()
+         expect(click.mock.contexts[0]).toMatchObject({
+            download: expect.stringMatching(/^daymark-backup-\d{4}-\d{2}-\d{2}\.json$/),
+            href: 'blob:daymark-backup',
+         })
+         expect(revokeObjectURL).toHaveBeenCalledWith('blob:daymark-backup')
+         expect(screen.getByRole('status')).toHaveTextContent('Backup downloaded.')
+      } finally {
+         click.mockRestore()
+         vi.unstubAllGlobals()
+      }
+   })
+
+   it('reports an invalid backup without replacing saved plans', async () => {
+      localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
+      localStorage.setItem(
+         'Today.todos',
+         JSON.stringify([
+            {
+               id: 1,
+               focus: false,
+               text: 'Keep this task',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+         ])
+      )
+      const invalidBackup = new File(['not json'], 'invalid.json', {
+         type: 'application/json',
+      })
+      Object.defineProperty(invalidBackup, 'text', {
+         value: async () => 'not json',
+      })
+      const { container } = render(<App />)
+
+      fireEvent.change(container.querySelector('input[type="file"]')!, {
+         target: { files: [invalidBackup] },
+      })
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+         'Could not import backup: The selected file is not valid JSON.'
+      )
+      expect(JSON.parse(localStorage.getItem('App.Sheets') || '[]')).toEqual(['Today'])
+      expect(JSON.parse(localStorage.getItem('Today.todos') || '[]')[0].text).toBe(
+         'Keep this task'
+      )
    })
 
    it('moves the first and last todos tasks to backlog and keeps source focus', async () => {

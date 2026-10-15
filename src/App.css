@@ -140,6 +140,46 @@ button {
    color: var(--accent);
 }
 
+.backupActions {
+   display: flex;
+   flex: 0 0 auto;
+   gap: 6px;
+}
+
+.backupActions button {
+   min-height: 36px;
+   padding: 0 11px;
+   border: 1px solid var(--line);
+   border-radius: 9px;
+   background: white;
+   color: #5e756d;
+   cursor: pointer;
+   font-size: 12px;
+   font-weight: 600;
+}
+
+.backupActions button:hover:not(:disabled) {
+   border-color: #bad5ca;
+   background: var(--accent-soft);
+   color: var(--accent);
+}
+
+.backupActions button:disabled {
+   cursor: wait;
+   opacity: 0.55;
+}
+
+.backupMessage {
+   width: fit-content;
+   margin: 14px auto -26px;
+   color: var(--accent);
+   font-size: 13px;
+}
+
+.backupMessage.backupError {
+   color: #a6463d;
+}
+
 .newSheetItem input {
    width: 130px;
    height: 38px;
@@ -223,6 +263,10 @@ button {
       width: 100%;
       overflow-x: auto;
       padding-bottom: 2px;
+   }
+
+   .backupActions {
+      width: 100%;
    }
 
    .sheetList {

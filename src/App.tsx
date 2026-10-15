@@ -1,6 +1,8 @@
 import classNames from 'classnames'
-import { useState, useRef, useEffect, KeyboardEvent } from 'react'
+import { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react'
 import Sheet from './stories/Sheet'
+import presetListConf from './stories/presetListConf.json'
+import { createBackup, importBackup } from './backup'
 import './App.css'
 
 export const DEBUGG_MODE = true
@@ -9,8 +11,11 @@ function App() {
    const [sheets, setSheets] = useState<Set<string>>(new Set())
    const [sheetsLoaded, setSheetsLoaded] = useState(false)
    const [currentSheet, setCurrentSheet] = useState<string>()
+   const [backupMessage, setBackupMessage] = useState<{ text: string; isError: boolean }>()
    const LS_SHEETS_KEY = 'App.Sheets'
    const inputAddSheet = useRef<HTMLInputElement>(null)
+   const inputImportBackup = useRef<HTMLInputElement>(null)
+   const listNames = Object.keys(presetListConf)
 
    useEffect(() => {
       const loadedSheets = JSON.parse(localStorage.getItem(LS_SHEETS_KEY) || '[]')
@@ -63,6 +68,53 @@ function App() {
          prevSheets.delete(s)
          return new Set(prevSheets)
       })
+
+   const handleExportBackup = () => {
+      try {
+         const backup = createBackup(localStorage, [...sheets], listNames)
+         const url = URL.createObjectURL(new Blob([backup], { type: 'application/json' }))
+         const link = document.createElement('a')
+         link.href = url
+         link.download = `daymark-backup-${new Date().toISOString().slice(0, 10)}.json`
+         document.body.appendChild(link)
+         try {
+            link.click()
+         } finally {
+            link.remove()
+            URL.revokeObjectURL(url)
+         }
+         setBackupMessage({ text: 'Backup downloaded.', isError: false })
+      } catch (error) {
+         const message = error instanceof Error ? error.message : String(error)
+         setBackupMessage({ text: `Could not export backup: ${message}`, isError: true })
+      }
+   }
+
+   const handleImportBackup = async (event: ChangeEvent<HTMLInputElement>) => {
+      const input = event.currentTarget
+      const file = input.files?.[0]
+      if (!file) return
+
+      try {
+         const importedSheets = importBackup(
+            await file.text(),
+            localStorage,
+            [...sheets],
+            listNames
+         )
+         setSheets(new Set(importedSheets))
+         setCurrentSheet(undefined)
+         setBackupMessage({
+            text: 'Backup restored. Matching plans were replaced; other plans were kept.',
+            isError: false,
+         })
+      } catch (error) {
+         const message = error instanceof Error ? error.message : String(error)
+         setBackupMessage({ text: `Could not import backup: ${message}`, isError: true })
+      } finally {
+         input.value = ''
+      }
+   }
 
    return (
       <div className='appShell' onKeyDown={handleGlobalInputKeyDown}>
@@ -123,7 +175,34 @@ function App() {
                   )}
                </ul>
             </nav>
+            <div className='backupActions'>
+               <button type='button' onClick={handleExportBackup} disabled={!sheetsLoaded}>
+                  Export backup
+               </button>
+               <button
+                  type='button'
+                  onClick={() => inputImportBackup.current?.click()}
+                  disabled={!sheetsLoaded}
+               >
+                  Import backup
+               </button>
+               <input
+                  ref={inputImportBackup}
+                  type='file'
+                  hidden
+                  accept='.json,application/json'
+                  onChange={handleImportBackup}
+               />
+            </div>
          </header>
+         {backupMessage && (
+            <p
+               className={`backupMessage${backupMessage.isError ? ' backupError' : ''}`}
+               role={backupMessage.isError ? 'alert' : 'status'}
+            >
+               {backupMessage.text}
+            </p>
+         )}
          <main className='appMain'>
             {currentSheet ? (
                <Sheet name={currentSheet}></Sheet>

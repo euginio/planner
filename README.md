@@ -32,6 +32,15 @@ Create the production build in `dist/`:
 npm run build
 ```
 
+## Backing up plans
+
+Use **Export backup** in the app header to download all plans and task lists as a
+versioned JSON file. Keep the file somewhere safe; it contains your plan data.
+
+Use **Import backup** to restore that file. Plans with matching names are
+replaced by the backup, while plans not included in the backup are kept. The app
+validates the backup before changing saved data.
+
 Run or build the component workbench:
 
 ```sh

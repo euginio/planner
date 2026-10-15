@@ -135,6 +135,17 @@ const List = ({
       setSize: (id: number, value: number) => setItemAttr(id, 'size', value),
       setText: (id: number, value: string) => setItemAttr(id, 'text', value),
       setDone: (id: number, value: boolean) => setItemAttr(id, 'done', value),
+      reorderTask: (sourceId: number, targetId: number, insertAfter: boolean) => {
+         const sourceIndex = list.findIndex(task => task.id === sourceId)
+         const targetIndex = list.findIndex(task => task.id === targetId)
+         if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) return
+
+         const listCopy = [...list]
+         const [taskToMove] = listCopy.splice(sourceIndex, 1)
+         const adjustedTargetIndex = listCopy.findIndex(task => task.id === targetId)
+         listCopy.splice(adjustedTargetIndex + Number(insertAfter), 0, taskToMove)
+         setList(listCopy)
+      },
       handleOnItemClick: (id: number) => {
          focusOn(id)
          activateHandler(name)

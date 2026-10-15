@@ -11,10 +11,16 @@ const emptyBackupLists = {
    done: [],
    deleted: [],
 }
+const automaticBackupDateKey = 'App.LastAutomaticBackupDate'
+const localDateKey = (date: Date) =>
+   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+      date.getDate()
+   ).padStart(2, '0')}`
 
 describe('App', () => {
    beforeEach(() => {
       localStorage.clear()
+      localStorage.setItem(automaticBackupDateKey, localDateKey(new Date()))
    })
 
    it('creates and opens a plan', () => {
@@ -212,10 +218,129 @@ describe('App', () => {
             href: 'blob:daymark-backup',
          })
          expect(revokeObjectURL).toHaveBeenCalledWith('blob:daymark-backup')
-         expect(screen.getByRole('status')).toHaveTextContent('Backup downloaded.')
+         expect(screen.getByRole('status')).toHaveTextContent('Backup download started.')
       } finally {
          click.mockRestore()
          vi.unstubAllGlobals()
+      }
+   })
+
+   it('automatically downloads one backup per local day when plans are opened', async () => {
+      localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
+      localStorage.removeItem(automaticBackupDateKey)
+      const createObjectURL = vi.fn(() => 'blob:daily-backup')
+      const revokeObjectURL = vi.fn()
+      vi.stubGlobal('URL', { createObjectURL, revokeObjectURL })
+      const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+
+      try {
+         const { unmount } = render(<App />)
+         expect(await screen.findByRole('status')).toHaveTextContent(
+            'Daily backup download started.'
+         )
+
+         expect(createObjectURL).toHaveBeenCalledOnce()
+         expect(click).toHaveBeenCalledOnce()
+         expect(localStorage.getItem(automaticBackupDateKey)).toBe(localDateKey(new Date()))
+
+         unmount()
+         render(<App />)
+
+         expect(createObjectURL).toHaveBeenCalledOnce()
+         expect(click).toHaveBeenCalledOnce()
+      } finally {
+         click.mockRestore()
+         vi.unstubAllGlobals()
+      }
+   })
+
+   it('does not create an automatic backup when there are no plans', async () => {
+      localStorage.removeItem(automaticBackupDateKey)
+      const createObjectURL = vi.fn(() => 'blob:daily-backup')
+      vi.stubGlobal('URL', { createObjectURL })
+
+      try {
+         render(<App />)
+         await screen.findByRole('button', { name: 'Export backup' })
+
+         expect(createObjectURL).not.toHaveBeenCalled()
+         expect(localStorage.getItem(automaticBackupDateKey)).toBeNull()
+      } finally {
+         vi.unstubAllGlobals()
+      }
+   })
+
+   it('reorders tasks by dragging a task handle within its list', async () => {
+      localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
+      localStorage.setItem(
+         'Today.todos',
+         JSON.stringify([
+            {
+               id: 1,
+               focus: true,
+               text: 'First task',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+            {
+               id: 2,
+               focus: false,
+               text: 'Second task',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+         ])
+      )
+      let targetElement: Element | null = null
+      const originalElementFromPoint = Object.getOwnPropertyDescriptor(
+         document,
+         'elementFromPoint'
+      )
+      Object.defineProperty(document, 'elementFromPoint', {
+         configurable: true,
+         value: () => targetElement,
+      })
+
+      try {
+         render(<App />)
+         const targetTask = (await screen.findByText('Second task')).closest('li')!
+         targetElement = targetTask
+         Object.defineProperty(targetTask, 'getBoundingClientRect', {
+            value: () => ({ top: 50, height: 40 }),
+         })
+         const dragHandle = screen.getByRole('button', { name: 'Reorder First task' })
+         const dispatchPointerEvent = (
+            type: string,
+            values: Record<string, number>
+         ) => {
+            const event = new Event(type, { bubbles: true, cancelable: true })
+            Object.entries(values).forEach(([key, value]) =>
+               Object.defineProperty(event, key, { value })
+            )
+            fireEvent(dragHandle, event)
+         }
+         dispatchPointerEvent('pointerdown', { pointerId: 5, button: 0 })
+         dispatchPointerEvent('pointermove', { pointerId: 5, clientX: 0, clientY: 90 })
+         dispatchPointerEvent('pointerup', { pointerId: 5 })
+
+         await waitFor(() => {
+            const tasks = JSON.parse(localStorage.getItem('Today.todos') || '[]')
+            expect(tasks.map((task: { text: string }) => task.text)).toEqual([
+               'Second task',
+               'First task',
+            ])
+         })
+         expect(screen.getByDisplayValue('First task')).toHaveFocus()
+      } finally {
+         if (originalElementFromPoint) {
+            Object.defineProperty(document, 'elementFromPoint', originalElementFromPoint)
+         } else {
+            Reflect.deleteProperty(document, 'elementFromPoint')
+         }
       }
    })
 

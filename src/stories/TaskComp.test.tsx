@@ -15,6 +15,7 @@ const allowedActions: itemNavigationType = {
 const createHandlers = () => ({
    setDone: vi.fn(),
    setIndentation: vi.fn(),
+   reorderTask: vi.fn(),
    setSize: vi.fn(),
    setText: vi.fn(),
    handleOnItemClick: vi.fn(),
@@ -81,6 +82,78 @@ describe('TaskComp', () => {
       fireEvent.keyDown(task, { key: 'Tab', shiftKey: true })
 
       expect(handlers.setIndentation).not.toHaveBeenCalled()
+   })
+
+   it('reorders tasks by dragging the mobile handle over another task', () => {
+      const handlers = createHandlers()
+      let targetElement: Element | null = null
+      const elementFromPoint = vi.fn(() => targetElement)
+      const originalElementFromPoint = Object.getOwnPropertyDescriptor(
+         document,
+         'elementFromPoint'
+      )
+      Object.defineProperty(document, 'elementFromPoint', {
+         configurable: true,
+         value: elementFromPoint,
+      })
+
+      const firstProps: React.ComponentProps<typeof TaskComp> = {
+         id: 1,
+         focus: true,
+         text: 'First task',
+         done: false,
+         size: 1,
+         indentation: 0,
+         impact: 1,
+         handlers,
+         allowedActions,
+      }
+      const secondProps = { ...firstProps, id: 2, focus: false, text: 'Second task' }
+      try {
+         render(
+            <>
+               <TaskComp {...firstProps} />
+               <TaskComp {...secondProps} />
+            </>
+         )
+
+         const secondTask = screen.getByText('Second task').closest('li')!
+         targetElement = secondTask
+         Object.defineProperty(secondTask, 'getBoundingClientRect', {
+            value: () => ({ top: 50, height: 40 }),
+         })
+         const dragHandle = screen.getByRole('button', { name: 'Reorder First task' })
+         const dispatchPointerEvent = (
+            type: string,
+            values: Record<string, number>
+         ) => {
+            const event = new Event(type, { bubbles: true, cancelable: true })
+            Object.entries(values).forEach(([key, value]) =>
+               Object.defineProperty(event, key, { value })
+            )
+            fireEvent(dragHandle, event)
+         }
+         dispatchPointerEvent('pointerdown', { pointerId: 7, button: 0 })
+         dispatchPointerEvent('pointermove', { pointerId: 7, clientX: 0, clientY: 70 })
+         dispatchPointerEvent('pointerup', { pointerId: 7 })
+
+         expect(elementFromPoint).toHaveBeenCalledWith(0, 70)
+         expect(handlers.reorderTask).toHaveBeenCalledWith(1, 2, false)
+      } finally {
+         if (originalElementFromPoint) {
+            Object.defineProperty(document, 'elementFromPoint', originalElementFromPoint)
+         } else {
+            Reflect.deleteProperty(document, 'elementFromPoint')
+         }
+      }
+   })
+
+   it('does not show a drag handle when the list does not allow sorting', () => {
+      renderTask(createHandlers(), {
+         allowedActions: { ...allowedActions, sortable: false },
+      })
+
+      expect(screen.queryByRole('button', { name: 'Reorder Plan report' })).not.toBeInTheDocument()
    })
 
    it('changes task size with Ctrl+ArrowUp and Ctrl+ArrowDown', () => {

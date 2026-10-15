@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { DEBUGG_MODE } from '../App'
 import './Task.css'
 import { itemNavigationType } from './Sheet'
@@ -29,6 +29,8 @@ const TaskComp = ({
    liHour?: number
 }) => {
    const taskInputRef = useRef<HTMLInputElement>(null)
+   const dragPointerId = useRef<number | null>(null)
+   const [isDragging, setIsDragging] = useState(false)
 
    useEffect(() => {
       if (focus && taskInputRef?.current) taskInputRef.current.focus()
@@ -48,6 +50,41 @@ const TaskComp = ({
    const swipeDone = () => handlers.setDone(id, !done)
    const toUpperCase = () => handlers.setText(id, text.toUpperCase())
    const toLowerCase = () => handlers.setText(id, text.toLowerCase())
+
+   const handleDragPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+      if (!allowedActions.sortable || e.button !== 0) return
+      dragPointerId.current = e.pointerId
+      if (typeof e.currentTarget.setPointerCapture === 'function') {
+         e.currentTarget.setPointerCapture(e.pointerId)
+      }
+      setIsDragging(true)
+      e.preventDefault()
+      e.stopPropagation()
+   }
+
+   const handleDragPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+      if (dragPointerId.current !== e.pointerId) return
+
+      const source = e.currentTarget.closest<HTMLLIElement>('[data-task-id]')
+      const target = e.currentTarget.ownerDocument
+         .elementFromPoint(e.clientX, e.clientY)
+         ?.closest<HTMLLIElement>('[data-task-id]')
+      if (!source || !target || source === target || source.parentElement !== target.parentElement)
+         return
+
+      const targetId = Number(target.dataset.taskId)
+      const targetRect = target.getBoundingClientRect()
+      handlers.reorderTask(id, targetId, e.clientY > targetRect.top + targetRect.height / 2)
+   }
+
+   const finishDrag = (e: React.PointerEvent<HTMLButtonElement>) => {
+      if (dragPointerId.current !== e.pointerId) return
+      dragPointerId.current = null
+      setIsDragging(false)
+      if (typeof e.currentTarget.releasePointerCapture === 'function') {
+         e.currentTarget.releasePointerCapture(e.pointerId)
+      }
+   }
 
    const handleInputKeyDown = (e: React.KeyboardEvent<HTMLLIElement>) => {
       //['ctrlKey', 'shiftKey', 'altKey', 'metaKey']
@@ -98,10 +135,26 @@ const TaskComp = ({
    return (
       <>
          <li
-            className={classNames('taskHolder')}
+            className={classNames('taskHolder', { dragging: isDragging })}
+            data-task-id={id}
             onClick={() => handlers.handleOnItemClick(id)}
             onKeyDown={handleInputKeyDown}
          >
+            {allowedActions.sortable && (
+               <button
+                  type='button'
+                  className='taskDragHandle'
+                  aria-label={`Reorder ${text || 'empty task'}`}
+                  aria-pressed={isDragging}
+                  onClick={e => e.stopPropagation()}
+                  onPointerDown={handleDragPointerDown}
+                  onPointerMove={handleDragPointerMove}
+                  onPointerUp={finishDrag}
+                  onPointerCancel={finishDrag}
+               >
+                  <span aria-hidden='true'>⠿</span>
+               </button>
+            )}
             {liHour && <HourPoint hour={liHour} size={size}></HourPoint>}
             <div
                className={classNames('task', { showSize: size > 1 })}

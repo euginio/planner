@@ -46,6 +46,14 @@
    background: #f8fbf8;
 }
 
+.taskDragHandle {
+   display: none;
+}
+
+.taskHolder.dragging {
+   opacity: 0.55;
+}
+
 .taskLabel {
    display: inline-block;
    padding: 7px 8px;
@@ -84,4 +92,50 @@
 .labeledInput {
    border: 1px solid transparent;
    outline: none;
+}
+
+@media (max-width: 680px) {
+   .taskHolder {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+   }
+
+   .task {
+      flex: 1;
+      min-width: 0;
+      width: auto;
+   }
+
+   .taskInput {
+      min-height: 40px;
+   }
+
+   .taskDragHandle {
+      display: inline-flex;
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      align-items: center;
+      justify-content: center;
+      margin: 0 !important;
+      padding: 0;
+      border: 1px solid var(--line, #e3ebe5);
+      border-radius: 9px;
+      background: #fbfdfb;
+      color: #668e80;
+      cursor: grab;
+      font-size: 20px;
+      line-height: 1;
+      touch-action: none;
+      user-select: none;
+   }
+
+   .taskDragHandle:active {
+      cursor: grabbing;
+   }
+
+   .taskListPanel button {
+      min-height: 40px;
+   }
 }

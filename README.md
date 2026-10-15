@@ -51,6 +51,9 @@ Some lists start collapsed. Use **show** or **hide** to change their visibility.
 The currently active list stays visible. Click a task to focus it and activate
 its list. Lists that do not allow adding tasks, such as **done** and **deleted**,
 cannot create new tasks with Enter.
+On narrow screens, use the grip beside a task to drag it to another position in
+the same list. Cross-list drag-and-drop is not supported; moving a task between
+lists still requires the keyboard shortcuts below.
 
 ### Keyboard shortcuts
 
@@ -76,6 +79,12 @@ Shortcuts apply to the focused task unless noted otherwise.
 Changes are saved automatically in the browser's local storage. Clearing browser
 site data, changing browser profiles, or using another device can make these
 plans unavailable.
+
+Once per local calendar day, when Daymark has plans available, it automatically
+starts a backup download. The app must be open for the download to start; it
+cannot run in the background while closed. Your browser may block or prompt for
+automatic downloads. Check your Downloads folder, and use the manual export
+button if the automatic download was blocked or if you want another backup.
 
 Use **Export backup** in the app header to download all plans and task lists as
 a versioned JSON file. Keep the file somewhere safe; it contains your plan data.

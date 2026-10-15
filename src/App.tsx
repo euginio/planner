@@ -6,6 +6,14 @@ import { createBackup, importBackup } from './backup'
 import './App.css'
 
 export const DEBUGG_MODE = true
+const AUTOMATIC_BACKUP_DATE_KEY = 'App.LastAutomaticBackupDate'
+
+function getLocalDateKey(date: Date) {
+   const year = date.getFullYear()
+   const month = String(date.getMonth() + 1).padStart(2, '0')
+   const day = String(date.getDate()).padStart(2, '0')
+   return `${year}-${month}-${day}`
+}
 
 function App() {
    const [sheets, setSheets] = useState<Set<string>>(new Set())
@@ -69,26 +77,56 @@ function App() {
          return new Set(prevSheets)
       })
 
+   const downloadBackup = (planNames: string[]) => {
+      const backup = createBackup(localStorage, planNames, listNames)
+      const url = URL.createObjectURL(new Blob([backup], { type: 'application/json' }))
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `daymark-backup-${getLocalDateKey(new Date())}.json`
+      document.body.appendChild(link)
+      try {
+         link.click()
+      } finally {
+         link.remove()
+         URL.revokeObjectURL(url)
+      }
+   }
+
    const handleExportBackup = () => {
       try {
-         const backup = createBackup(localStorage, [...sheets], listNames)
-         const url = URL.createObjectURL(new Blob([backup], { type: 'application/json' }))
-         const link = document.createElement('a')
-         link.href = url
-         link.download = `daymark-backup-${new Date().toISOString().slice(0, 10)}.json`
-         document.body.appendChild(link)
-         try {
-            link.click()
-         } finally {
-            link.remove()
-            URL.revokeObjectURL(url)
-         }
-         setBackupMessage({ text: 'Backup downloaded.', isError: false })
+         downloadBackup([...sheets])
+         localStorage.setItem(AUTOMATIC_BACKUP_DATE_KEY, getLocalDateKey(new Date()))
+         setBackupMessage({
+            text: 'Backup download started. Check your Downloads folder.',
+            isError: false,
+         })
       } catch (error) {
          const message = error instanceof Error ? error.message : String(error)
          setBackupMessage({ text: `Could not export backup: ${message}`, isError: true })
       }
    }
+
+   useEffect(() => {
+      if (!sheetsLoaded || !sheets.size) return
+
+      const today = getLocalDateKey(new Date())
+      if (localStorage.getItem(AUTOMATIC_BACKUP_DATE_KEY) === today) return
+
+      try {
+         downloadBackup([...sheets])
+         localStorage.setItem(AUTOMATIC_BACKUP_DATE_KEY, today)
+         setBackupMessage({
+            text: 'Daily backup download started. Check Downloads; if it was blocked, use Export backup.',
+            isError: false,
+         })
+      } catch (error) {
+         const message = error instanceof Error ? error.message : String(error)
+         setBackupMessage({
+            text: `Could not create daily backup: ${message}. Use Export backup to try again.`,
+            isError: true,
+         })
+      }
+   }, [sheets, sheetsLoaded])
 
    const handleImportBackup = async (event: ChangeEvent<HTMLInputElement>) => {
       const input = event.currentTarget

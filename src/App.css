@@ -269,6 +269,21 @@ button {
       width: 100%;
    }
 
+   .backupActions button,
+   .sheetButton,
+   .backButton {
+      min-height: 44px;
+   }
+
+   .newSheetItem input {
+      height: 44px;
+   }
+
+   .removeSheet {
+      width: 40px;
+      height: 40px;
+   }
+
    .sheetList {
       width: max-content;
    }

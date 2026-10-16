@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { helper } from '../helper'
 import NavigableList from './NavigableList'
 import { ListConf, TaskMovement } from './Sheet'
+import { isTaskList, readStoredJson, writeStoredJson } from '../storage'
 import './List.css'
 
 export interface TaskI {
@@ -35,6 +36,7 @@ const List = ({
    taskMovement,
    isActive,
    activateHandler,
+   onStorageError,
 }: {
    sheetName: string
    name: string
@@ -43,6 +45,7 @@ const List = ({
    taskMovement: TaskMovement | undefined
    isActive: boolean
    activateHandler: (a: string) => void
+   onStorageError: (key: string, message?: string) => void
 }) => {
    const listActions = listConfig.listActions
    const canPostpone =
@@ -52,25 +55,40 @@ const List = ({
 
    const [list, setList] = useState<Task[]>([])
    const [loadedListKey, setLoadedListKey] = useState<string>()
+   const [loadError, setLoadError] = useState<string>()
    const [visible, setVisible] = useState<boolean>(!!listConfig.listLook.visible)
 
    const LS_LIST_KEY = useMemo(() => sheetName + '.' + name, [sheetName, name])
 
    useEffect(() => {
-      let loadedList = JSON.parse(localStorage.getItem(LS_LIST_KEY) || '[]')
-      if (!loadedList.length) loadedList = [{ ...defaultNewTask, id: 1 }]
-      if (isActive && !loadedList.some((task: Task) => task.focus)) {
-         loadedList[0] = { ...loadedList[0], focus: true }
+      try {
+         const savedList = readStoredJson(localStorage, LS_LIST_KEY, [], isTaskList)
+         const loadedList = savedList.length ? savedList : [{ ...defaultNewTask, id: 1 }]
+         if (isActive && !loadedList.some(task => task.focus)) {
+            loadedList[0] = { ...loadedList[0], focus: true }
+         }
+         setList(loadedList)
+         setLoadedListKey(LS_LIST_KEY)
+         setLoadError(undefined)
+         onStorageError(LS_LIST_KEY)
+      } catch (error) {
+         const message = error instanceof Error ? error.message : String(error)
+         setLoadError(message)
+         onStorageError(LS_LIST_KEY, `${message} The saved list was left unchanged.`)
       }
-      setList(loadedList)
-      setLoadedListKey(LS_LIST_KEY)
    }, [LS_LIST_KEY])
 
    useEffect(() => {
       if (loadedListKey === LS_LIST_KEY) {
-         localStorage.setItem(LS_LIST_KEY, JSON.stringify(list))
+         try {
+            writeStoredJson(localStorage, LS_LIST_KEY, list)
+            onStorageError(LS_LIST_KEY)
+         } catch (error) {
+            const message = error instanceof Error ? error.message : String(error)
+            onStorageError(LS_LIST_KEY, `${message} Your latest task changes may not be saved.`)
+         }
       }
-   }, [list, LS_LIST_KEY, loadedListKey])
+   }, [list, LS_LIST_KEY, loadedListKey, onStorageError])
 
    useEffect(() => {
       if (!isActive) unFocusAll()
@@ -94,6 +112,7 @@ const List = ({
    }, [taskMovement, name])
 
    const handleInputKeyDown = (e: React.KeyboardEvent) => {
+      if (loadError) return
       if (['Alt', 'Control'].includes(e.key)) {
          e.preventDefault() // prevents put prompt at begining
          e.stopPropagation()
@@ -291,21 +310,29 @@ const List = ({
          className={`taskListPanel${isActive ? ' activeList' : ''}`}
          aria-label={`${name} task list`}
       >
-         <NavigableList
-            list={list}
-            name={name}
-            navigableHandlers={navigableHandlers}
-            itemHandlers={itemHandlers}
-            listConfig={listConfig}
-            visible={visible || isActive}
-         ></NavigableList>
-         {visible && listActions.clearCompletedTo && (
+         {loadError ? (
+            <p className='backupMessage backupError' role='alert'>
+               This task list could not be loaded. Import a backup to recover it.
+            </p>
+         ) : (
+            <NavigableList
+               list={list}
+               name={name}
+               navigableHandlers={navigableHandlers}
+               itemHandlers={itemHandlers}
+               listConfig={listConfig}
+               visible={visible || isActive}
+            ></NavigableList>
+         )}
+         {!loadError && visible && listActions.clearCompletedTo && (
             <button onClick={clearCompleted}>Clear complete</button>
          )}
-         {visible && listActions.resetCompleted && (
+         {!loadError && visible && listActions.resetCompleted && (
             <button onClick={resetCompleted}>Reset Completed</button>
          )}
-         {listActions.copyAllTo && <button onClick={copyAllMarked}>Copy All</button>}
+         {!loadError && listActions.copyAllTo && (
+            <button onClick={copyAllMarked}>Copy All</button>
+         )}
          <button onClick={toggleVisibility}>{visible ? 'hide' : 'show'}</button>
       </section>
    )

@@ -37,6 +37,56 @@ describe('App', () => {
       expect(screen.getByRole('heading', { level: 1, name: 'Today' })).toBeInTheDocument()
    })
 
+   it('preserves malformed plan data and offers backup recovery', async () => {
+      const malformedPlans = '{not json'
+      localStorage.setItem('App.Sheets', malformedPlans)
+      render(<App />)
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+         'Import a backup to recover your plans.'
+      )
+      expect(localStorage.getItem('App.Sheets')).toBe(malformedPlans)
+      expect(screen.getByRole('textbox', { name: 'New plan name' })).toBeDisabled()
+      expect(screen.getByRole('button', { name: 'Export backup' })).toBeDisabled()
+      expect(screen.getByRole('button', { name: 'Import backup' })).toBeEnabled()
+   })
+
+   it('preserves a malformed task list instead of replacing it with an empty list', async () => {
+      localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
+      const malformedTasks = JSON.stringify([{ id: 'invalid', text: 'Keep this raw data' }])
+      localStorage.setItem('Today.todos', malformedTasks)
+      render(<App />)
+
+      await waitFor(() => {
+         expect(screen.getAllByRole('alert').some(alert =>
+            alert.textContent?.includes('The saved list was left unchanged.')
+         )).toBe(true)
+      })
+      expect(localStorage.getItem('Today.todos')).toBe(malformedTasks)
+   })
+
+   it('reports when task changes cannot be saved', async () => {
+      localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
+      const originalSetItem = localStorage.setItem.bind(localStorage)
+      const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(function (
+         key,
+         value
+      ) {
+         if (key === 'Today.todos') throw new Error('Storage is full')
+         originalSetItem(key, value)
+      })
+
+      try {
+         render(<App />)
+         expect(await screen.findByRole('alert')).toHaveTextContent(
+            'Your latest task changes may not be saved.'
+         )
+         expect(screen.getByRole('alert')).toHaveTextContent('Storage is full')
+      } finally {
+         setItemSpy.mockRestore()
+      }
+   })
+
    it('focuses the first task after opening a plan with no saved tasks', async () => {
       localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
       render(<App />)

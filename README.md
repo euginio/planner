@@ -81,6 +81,11 @@ Shortcuts apply to the focused task unless noted otherwise.
 Changes are saved automatically in the browser's local storage. Clearing browser
 site data, changing browser profiles, or using another device can make these
 plans unavailable.
+Daymark validates saved plans and tasks when loading them. If saved data is
+malformed or the browser cannot read or save it, the app displays an error.
+Malformed data is left untouched rather than replaced with an empty list; import
+a valid backup to recover plans. A storage write error means recent changes may
+not have been saved.
 
 Once per local calendar day, when Daymark has plans available, it automatically
 starts a backup download. The app must be open for the download to start; it

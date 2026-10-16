@@ -1,3 +1,11 @@
+import {
+   isTaskList,
+   readStoredJson,
+   readStoredValue,
+   removeStoredValue,
+   writeStoredValue,
+} from './storage'
+
 export const BACKUP_FORMAT = 'daymark-backup'
 export const BACKUP_VERSION = 1
 const SHEETS_STORAGE_KEY = 'App.Sheets'
@@ -52,9 +60,8 @@ export function createBackup(
       lists: Object.fromEntries(
          listNames.map(listName => {
             const storageKey = `${name}.${listName}`
-            const storedList = storage.getItem(storageKey)
-            const tasks = storedList === null ? [] : JSON.parse(storedList)
-            return [listName, parseTaskList(tasks, `Saved list "${storageKey}"`)]
+            const tasks = readStoredJson(storage, storageKey, [], isTaskList)
+            return [listName, tasks]
          })
       ),
    }))
@@ -142,24 +149,25 @@ export function importBackup(
       SHEETS_STORAGE_KEY,
       ...plans.flatMap(plan => listNames.map(listName => `${plan.name}.${listName}`)),
    ]
-   const originalValues = new Map(storageKeys.map(key => [key, storage.getItem(key)]))
+   const originalValues = new Map(storageKeys.map(key => [key, readStoredValue(storage, key)]))
 
    try {
       for (const plan of plans) {
          for (const listName of listNames) {
-            storage.setItem(
+            writeStoredValue(
+               storage,
                `${plan.name}.${listName}`,
                JSON.stringify(plan.lists[listName])
             )
          }
       }
-      storage.setItem(SHEETS_STORAGE_KEY, JSON.stringify(sheetNames))
+      writeStoredValue(storage, SHEETS_STORAGE_KEY, JSON.stringify(sheetNames))
    } catch (error) {
       const rollbackErrors: unknown[] = []
       for (const [key, originalValue] of originalValues) {
          try {
-            if (originalValue === null) storage.removeItem(key)
-            else storage.setItem(key, originalValue)
+            if (originalValue === null) removeStoredValue(storage, key)
+            else writeStoredValue(storage, key, originalValue)
          } catch (rollbackError) {
             rollbackErrors.push(rollbackError)
          }

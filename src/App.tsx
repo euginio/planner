@@ -1,8 +1,15 @@
 import classNames from 'classnames'
-import { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react'
+import { useState, useRef, useEffect, useCallback, KeyboardEvent, ChangeEvent } from 'react'
 import Sheet from './stories/Sheet'
 import presetListConf from './stories/presetListConf.json'
 import { createBackup, importBackup } from './backup'
+import {
+   isSheetNameList,
+   readStoredJson,
+   readStoredValue,
+   writeStoredJson,
+   writeStoredValue,
+} from './storage'
 import './App.css'
 
 export const DEBUGG_MODE = true
@@ -18,25 +25,53 @@ function getLocalDateKey(date: Date) {
 function App() {
    const [sheets, setSheets] = useState<Set<string>>(new Set())
    const [sheetsLoaded, setSheetsLoaded] = useState(false)
+   const [sheetsDataValid, setSheetsDataValid] = useState(false)
    const [currentSheet, setCurrentSheet] = useState<string>()
    const [backupMessage, setBackupMessage] = useState<{ text: string; isError: boolean }>()
+   const [storageErrors, setStorageErrors] = useState<Record<string, string>>({})
    const LS_SHEETS_KEY = 'App.Sheets'
    const inputAddSheet = useRef<HTMLInputElement>(null)
    const inputImportBackup = useRef<HTMLInputElement>(null)
    const listNames = Object.keys(presetListConf)
-
-   useEffect(() => {
-      const loadedSheets = JSON.parse(localStorage.getItem(LS_SHEETS_KEY) || '[]')
-      if (loadedSheets.length) {
-         setSheets(new Set(loadedSheets))
-         setCurrentSheet(loadedSheets[0])
-      }
-      setSheetsLoaded(true)
+   const reportStorageError = useCallback((key: string, message?: string) => {
+      setStorageErrors(current => {
+         if (!message) {
+            const { [key]: _removed, ...remaining } = current
+            return remaining
+         }
+         return { ...current, [key]: message }
+      })
    }, [])
+   const hasStorageErrors = Object.keys(storageErrors).length > 0
 
    useEffect(() => {
-      if (sheetsLoaded) localStorage.setItem(LS_SHEETS_KEY, JSON.stringify([...sheets]))
-   }, [sheets, sheetsLoaded])
+      try {
+         const loadedSheets = readStoredJson(localStorage, LS_SHEETS_KEY, [], isSheetNameList)
+         setSheetsDataValid(true)
+         reportStorageError(LS_SHEETS_KEY)
+         if (loadedSheets.length) {
+            setSheets(new Set(loadedSheets))
+            setCurrentSheet(loadedSheets[0])
+         }
+         setSheetsLoaded(true)
+      } catch (error) {
+         const message = error instanceof Error ? error.message : String(error)
+         setSheetsDataValid(false)
+         reportStorageError(LS_SHEETS_KEY, `${message} Import a backup to recover your plans.`)
+         setSheetsLoaded(true)
+      }
+   }, [reportStorageError])
+
+   useEffect(() => {
+      if (!sheetsLoaded || !sheetsDataValid) return
+      try {
+         writeStoredJson(localStorage, LS_SHEETS_KEY, [...sheets])
+         reportStorageError(LS_SHEETS_KEY)
+      } catch (error) {
+         const message = error instanceof Error ? error.message : String(error)
+         reportStorageError(LS_SHEETS_KEY, `${message} Your latest plan changes may not be saved.`)
+      }
+   }, [sheets, sheetsLoaded, sheetsDataValid, reportStorageError])
 
    const handleGlobalInputKeyDown = (e: KeyboardEvent) => {
       if (['Alt', 'Control'].includes(e.key)) {
@@ -59,7 +94,7 @@ function App() {
          e.stopPropagation()
       }
       //@ts-ignore
-      if (e.key === 'Enter' && inputAddSheet.current.value.trim()) {
+      if (e.key === 'Enter' && sheetsDataValid && inputAddSheet.current?.value.trim()) {
          //@ts-ignore
          const inputValue = inputAddSheet.current.value.trim()
          setSheets(prevSheets => new Set(prevSheets).add(inputValue.trim()))
@@ -71,11 +106,13 @@ function App() {
       let copy = s
       setCurrentSheet(copy)
    }
-   const deleteSheet = (s: string) =>
+   const deleteSheet = (s: string) => {
+      if (!sheetsDataValid) return
       setSheets(prevSheets => {
          prevSheets.delete(s)
          return new Set(prevSheets)
       })
+   }
 
    const downloadBackup = (planNames: string[]) => {
       const backup = createBackup(localStorage, planNames, listNames)
@@ -93,9 +130,9 @@ function App() {
    }
 
    const handleExportBackup = () => {
+      if (!sheetsDataValid) return
       try {
          downloadBackup([...sheets])
-         localStorage.setItem(AUTOMATIC_BACKUP_DATE_KEY, getLocalDateKey(new Date()))
          setBackupMessage({
             text: 'Backup download started. Check your Downloads folder.',
             isError: false,
@@ -103,6 +140,22 @@ function App() {
       } catch (error) {
          const message = error instanceof Error ? error.message : String(error)
          setBackupMessage({ text: `Could not export backup: ${message}`, isError: true })
+         return
+      }
+
+      try {
+         writeStoredValue(
+            localStorage,
+            AUTOMATIC_BACKUP_DATE_KEY,
+            getLocalDateKey(new Date())
+         )
+         reportStorageError(AUTOMATIC_BACKUP_DATE_KEY)
+      } catch (error) {
+         const message = error instanceof Error ? error.message : String(error)
+         reportStorageError(
+            AUTOMATIC_BACKUP_DATE_KEY,
+            `${message} The backup download started, but its daily-download marker could not be saved.`
+         )
       }
    }
 
@@ -110,11 +163,19 @@ function App() {
       if (!sheetsLoaded || !sheets.size) return
 
       const today = getLocalDateKey(new Date())
-      if (localStorage.getItem(AUTOMATIC_BACKUP_DATE_KEY) === today) return
+      let lastBackupDate: string | null
+      try {
+         lastBackupDate = readStoredValue(localStorage, AUTOMATIC_BACKUP_DATE_KEY)
+         reportStorageError(AUTOMATIC_BACKUP_DATE_KEY)
+      } catch (error) {
+         const message = error instanceof Error ? error.message : String(error)
+         reportStorageError(AUTOMATIC_BACKUP_DATE_KEY, message)
+         return
+      }
+      if (lastBackupDate === today) return
 
       try {
          downloadBackup([...sheets])
-         localStorage.setItem(AUTOMATIC_BACKUP_DATE_KEY, today)
          setBackupMessage({
             text: 'Daily backup download started. Check Downloads; if it was blocked, use Export backup.',
             isError: false,
@@ -125,8 +186,19 @@ function App() {
             text: `Could not create daily backup: ${message}. Use Export backup to try again.`,
             isError: true,
          })
+         return
       }
-   }, [sheets, sheetsLoaded])
+      try {
+         writeStoredValue(localStorage, AUTOMATIC_BACKUP_DATE_KEY, today)
+         reportStorageError(AUTOMATIC_BACKUP_DATE_KEY)
+      } catch (error) {
+         const message = error instanceof Error ? error.message : String(error)
+         reportStorageError(
+            AUTOMATIC_BACKUP_DATE_KEY,
+            `${message} The daily backup download started, but its marker could not be saved.`
+         )
+      }
+   }, [sheets, sheetsLoaded, reportStorageError])
 
    const handleImportBackup = async (event: ChangeEvent<HTMLInputElement>) => {
       const input = event.currentTarget
@@ -142,6 +214,8 @@ function App() {
          )
          setSheets(new Set(importedSheets))
          setCurrentSheet(undefined)
+         setSheetsDataValid(true)
+         setStorageErrors({})
          setBackupMessage({
             text: 'Backup restored. Matching plans were replaced; other plans were kept.',
             isError: false,
@@ -175,7 +249,7 @@ function App() {
                         >
                            {s}
                         </button>
-                        {!currentSheet && (
+                        {!currentSheet && sheetsDataValid && (
                            <button
                               type='button'
                               className='removeSheet'
@@ -208,13 +282,18 @@ function App() {
                            ref={inputAddSheet}
                            onKeyDown={handleInputKeyDown}
                            placeholder='+ New plan'
+                           disabled={!sheetsDataValid}
                         />
                      </li>
                   )}
                </ul>
             </nav>
             <div className='backupActions'>
-               <button type='button' onClick={handleExportBackup} disabled={!sheetsLoaded}>
+               <button
+                  type='button'
+                  onClick={handleExportBackup}
+                  disabled={!sheetsLoaded || !sheetsDataValid}
+               >
                   Export backup
                </button>
                <button
@@ -233,6 +312,11 @@ function App() {
                />
             </div>
          </header>
+         {hasStorageErrors && (
+            <p className='backupMessage backupError' role='alert'>
+               {Object.values(storageErrors).join(' ')}
+            </p>
+         )}
          {backupMessage && (
             <p
                className={`backupMessage${backupMessage.isError ? ' backupError' : ''}`}
@@ -243,7 +327,7 @@ function App() {
          )}
          <main className='appMain'>
             {currentSheet ? (
-               <Sheet name={currentSheet}></Sheet>
+               <Sheet name={currentSheet} onStorageError={reportStorageError}></Sheet>
             ) : (
                <section className='welcomePanel'>
                   <span className='eyebrow'>MAKE SPACE FOR WHAT MATTERS</span>

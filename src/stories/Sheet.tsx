@@ -40,7 +40,13 @@ export interface TaskMovement {
    tasksToMove: Task[]
    position: number
 }
-function Sheet({ name }: { name: string }) {
+function Sheet({
+   name,
+   onStorageError,
+}: {
+   name: string
+   onStorageError: (key: string, message?: string) => void
+}) {
    // const listNames = ['todos', 'backlog', 'someday', 'done', 'deleted']
 
    const PresetlistsConf: { [key: string]: ListConf } = presetcon as { [key: string]: ListConf }
@@ -97,6 +103,7 @@ function Sheet({ name }: { name: string }) {
                   taskMovement={taskMovement}
                   isActive={activeList === listName}
                   activateHandler={setActiveList}
+                  onStorageError={onStorageError}
                ></List>
             ))}
          </div>

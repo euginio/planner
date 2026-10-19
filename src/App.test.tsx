@@ -5,9 +5,9 @@ import App from './App'
 const emptyBackupLists = {
    todos: [],
    backlog: [],
+   someday: [],
    fixed: [],
    microHabits: [],
-   someday: [],
    done: [],
    deleted: [],
 }

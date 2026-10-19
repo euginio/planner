@@ -36,6 +36,18 @@
          "indentable": true
       }
    },
+   "someday": {
+      "listLook": {},
+      "listActions": { "clearCompletedTo": null, "promoteTo": "backlog", "removeTo": null },
+      "itemsNavigation": {
+         "add": true,
+         "editable": true,
+         "completable": true,
+         "sizeable": true,
+         "sortable": true,
+         "indentable": true
+      }
+   },
    "fixed": {
       "listLook": {},
       "listActions": { "removeTo": null, "copyAllTo": "todos" },
@@ -60,18 +72,6 @@
          "sortable": true,
          "indentable": true,
          "dragAndDrop": false
-      }
-   },
-   "someday": {
-      "listLook": {},
-      "listActions": { "clearCompletedTo": null, "promoteTo": "backlog", "removeTo": null },
-      "itemsNavigation": {
-         "add": true,
-         "editable": true,
-         "completable": true,
-         "sizeable": true,
-         "sortable": true,
-         "indentable": true
       }
    },
    "done": {

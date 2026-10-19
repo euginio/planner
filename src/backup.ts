@@ -6,6 +6,7 @@ import {
    removeStoredValue,
    writeStoredValue,
 } from './storage'
+import { STORAGE_SCHEMA_VERSION, STORAGE_SCHEMA_VERSION_KEY } from './storageMigrations'
 
 export const BACKUP_FORMAT = 'daymark-backup'
 export const BACKUP_VERSION = 1
@@ -63,12 +64,19 @@ function parseBackup(content: string, listNames: string[]): BackupPlan[] {
       throw new Error('The selected file is not valid JSON.')
    }
 
-   if (
-      !isRecord(parsed) ||
-      parsed.format !== BACKUP_FORMAT ||
-      parsed.version !== BACKUP_VERSION ||
-      !Array.isArray(parsed.plans)
-   ) {
+   if (!isRecord(parsed) || parsed.format !== BACKUP_FORMAT) {
+      throw new Error('This is not a supported Daymark backup file.')
+   }
+   if (parsed.version !== BACKUP_VERSION) {
+      const version = parsed.version
+      if (typeof version === 'number' && version > BACKUP_VERSION) {
+         throw new Error(
+            `This backup uses a newer format (version ${version}) than this app supports (version ${BACKUP_VERSION}).`
+         )
+      }
+      throw new Error(`This backup format version is not supported: ${String(version)}.`)
+   }
+   if (!Array.isArray(parsed.plans)) {
       throw new Error('This is not a supported Daymark backup file.')
    }
 
@@ -124,6 +132,7 @@ export function importBackup(
 
    const storageKeys = [
       SHEETS_STORAGE_KEY,
+      STORAGE_SCHEMA_VERSION_KEY,
       ...plans.flatMap(plan => listNames.map(listName => `${plan.name}.${listName}`)),
    ]
    const originalValues = new Map(storageKeys.map(key => [key, readStoredValue(storage, key)]))
@@ -139,6 +148,11 @@ export function importBackup(
          }
       }
       writeStoredValue(storage, SHEETS_STORAGE_KEY, JSON.stringify(sheetNames))
+      writeStoredValue(
+         storage,
+         STORAGE_SCHEMA_VERSION_KEY,
+         JSON.stringify(STORAGE_SCHEMA_VERSION)
+      )
    } catch (error) {
       const rollbackErrors: unknown[] = []
       for (const [key, originalValue] of originalValues) {

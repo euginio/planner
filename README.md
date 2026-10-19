@@ -80,11 +80,13 @@ Shortcuts apply to the focused task unless noted otherwise.
 Changes are saved automatically in the browser's local storage. Clearing browser
 site data, changing browser profiles, or using another device can make these
 plans unavailable.
-Daymark validates saved plans and tasks when loading them. If saved data is
-malformed or the browser cannot read or save it, the app displays an error.
-Malformed data is left untouched rather than replaced with an empty list; import
-a valid backup to recover plans. A storage write error means recent changes may
-not have been saved.
+Daymark validates saved plans and tasks when loading them. The original
+unversioned storage layout is validated and marked as schema version 1 without
+rewriting task data. Future schema versions are not opened by older app versions.
+If saved data is malformed or the browser cannot read or save it, the app
+displays an error. Malformed data is left untouched rather than replaced with
+an empty list; import a valid backup to recover plans. A storage write error
+means recent changes may not have been saved.
 
 Once per local calendar day, when Daymark has plans available, it automatically
 starts a backup download. The app must be open for the download to start; it
@@ -95,8 +97,9 @@ button if the automatic download was blocked or if you want another backup.
 Use **Export backup** in the app header to download all plans and task lists as
 a versioned JSON file. Keep the file somewhere safe; it contains your plan data.
 
-Use **Import backup** to restore that file. The app validates the backup before
-changing saved data. Plans with matching names are replaced by the backup;
+Use **Import backup** to restore that file. The app validates the backup version
+and contents before changing saved data. Backups from a newer format are
+rejected without changing saved data. Plans with matching names are replaced by the backup;
 plans not included in the backup are kept. If the file is invalid, the app
 reports an error and leaves existing plans unchanged.
 

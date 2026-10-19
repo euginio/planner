@@ -58,6 +58,7 @@ describe('plan backups', () => {
       expect(JSON.parse(localStorage.getItem('Later.todos') || '[]')[0].text).toBe('Keep this')
       expect(JSON.parse(localStorage.getItem('New.todos') || '[]')).toEqual([])
       expect(JSON.parse(localStorage.getItem('App.Sheets') || '[]')).toEqual(sheets)
+      expect(localStorage.getItem('App.StorageVersion')).toBe('1')
    })
 
    it('rejects invalid backups without changing stored plans', () => {
@@ -101,6 +102,21 @@ describe('plan backups', () => {
 
       expect(localStorage.getItem('App.Sheets')).toBe(originalSheets)
       expect(localStorage.getItem('Today.todos')).toBe(originalTasks)
+   })
+
+   it('rejects backups from a newer format without changing stored data', () => {
+      localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
+      const backup = JSON.stringify({
+         format: 'daymark-backup',
+         version: 2,
+         plans: [],
+      })
+
+      expect(() => importBackup(backup, localStorage, ['Today'], listNames)).toThrow(
+         'newer format'
+      )
+      expect(localStorage.getItem('App.Sheets')).toBe(JSON.stringify(['Today']))
+      expect(localStorage.getItem('App.StorageVersion')).toBeNull()
    })
 
    it('rejects duplicate plan names before writing anything', () => {

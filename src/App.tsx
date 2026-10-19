@@ -5,6 +5,7 @@ import Sheet from './stories/Sheet'
 import presetListConf from './stories/presetListConf.json'
 import { createBackup, importBackup } from './backup'
 import { deletePlan, PLAN_NAMES_STORAGE_KEY } from './planStorage'
+import { migrateStorage } from './storageMigrations'
 import {
    isSheetNameList,
    readStoredJson,
@@ -46,6 +47,7 @@ function App() {
 
    useEffect(() => {
       try {
+         migrateStorage(localStorage)
          const loadedSheets = readStoredJson(localStorage, LS_SHEETS_KEY, [], isSheetNameList)
          setSheetsDataValid(true)
          reportStorageError(LS_SHEETS_KEY)

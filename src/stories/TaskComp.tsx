@@ -1,6 +1,7 @@
 import classNames from 'classnames'
 import React, { useEffect, useRef, useState } from 'react'
-import './Task.css'
+import type { CSSProperties } from 'react'
+import '../styles/Task.css'
 import { itemNavigationType } from './Sheet'
 import { HourPoint } from './HourPoint'
 import type { TaskItemHandlers } from './handlers'
@@ -156,10 +157,12 @@ const TaskComp = ({
          {liHour && <HourPoint hour={liHour} size={size}></HourPoint>}
          <div
             className={classNames('task', { showSize: size > 1 })}
-            style={{
-               left: 20 * indentation,
-               height: 20 * size,
-            }}
+            style={
+               {
+                  '--task-indent': `${20 * indentation}px`,
+                  '--task-height': `${20 * size}px`,
+               } as CSSProperties
+            }
          >
             {focus ? (
                <input

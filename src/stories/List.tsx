@@ -11,7 +11,7 @@ import type {
    TaskItemHandlers,
    TaskListMovement,
 } from './handlers'
-import './List.css'
+import '../styles/List.css'
 
 export interface TaskI {
    focus: boolean

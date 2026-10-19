@@ -1,6 +1,6 @@
 import { Task } from './List'
 import TaskCounter from './TaskCounter'
-import './TaskInfo.css'
+import '../styles/TaskInfo.css'
 
 function ListInfo({ list }: { list: Task[] }) {
    return (

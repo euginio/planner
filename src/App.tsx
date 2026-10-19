@@ -11,7 +11,7 @@ import {
    writeStoredJson,
    writeStoredValue,
 } from './storage'
-import './App.css'
+import './styles/App.css'
 
 const AUTOMATIC_BACKUP_DATE_KEY = 'App.LastAutomaticBackupDate'
 const LS_SHEETS_KEY = 'App.Sheets'

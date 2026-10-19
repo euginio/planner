@@ -1,4 +1,4 @@
-import './Introduction.css'
+import '../styles/Introduction.css'
 
 export default {
    title: 'Planner/Introduction',
@@ -6,9 +6,7 @@ export default {
 
 export const Overview = () => (
    <main className='storyIntroduction'>
-      <p className='storyIntroductionEyebrow'>
-         PLANNER COMPONENTS
-      </p>
+      <p className='storyIntroductionEyebrow'>PLANNER COMPONENTS</p>
       <h1>Explore the planner in isolation</h1>
       <p>
          Use the stories in the sidebar to inspect task states and interactions without the rest of

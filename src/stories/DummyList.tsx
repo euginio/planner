@@ -1,6 +1,6 @@
 import TaskComp from './TaskComp'
 import ListInfo from './TaskInfo'
-import './DummyList.css'
+import '../styles/DummyList.css'
 import { Task } from './List'
 import { ListConf } from './Sheet'
 import { helper } from '../helper'

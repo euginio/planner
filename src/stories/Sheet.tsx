@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import List from './List'
-import './Sheet.css'
+import '../styles/Sheet.css'
 import presetcon from './presetListConf.json'
 import type { SheetHandlers, TaskListMovement } from './handlers'
 

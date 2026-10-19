@@ -1,5 +1,7 @@
 import classNames from 'classnames'
 import { useEffect, useState } from 'react'
+import type { CSSProperties } from 'react'
+import '../styles/HourPoint.css'
 
 export const HourPoint = ({ hour, size }: { hour: number; size: number }) => {
    const init = new Date()
@@ -35,10 +37,11 @@ export const HourPoint = ({ hour, size }: { hour: number; size: number }) => {
                className={classNames('currentHour', {
                   floatLeft: hoursPassed >= 0.5,
                })}
-               style={{
-                  position: 'relative',
-                  top: hoursPassed >= 1 ? hoursPassed * 43 - 43 : 0,
-               }}
+               style={
+                  {
+                     '--hour-offset': `${hoursPassed >= 1 ? hoursPassed * 43 - 43 : 0}px`,
+                  } as CSSProperties
+               }
             >
                {hours}:{minutes < 10 ? '0' : ''}
                {minutes}

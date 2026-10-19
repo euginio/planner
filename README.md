@@ -27,9 +27,8 @@ Vite serves the app at [http://localhost:4006](http://localhost:4006).
 - Select a plan name to open it. Use **All plans** to return to the plan
   overview.
 - From the overview, use the **×** button beside a plan to delete it. Deleting
-  the plan removes it from the plan index, but does not erase its task data from
-  browser storage. Creating a plan later with the same name can show those old
-  tasks again.
+  the plan also removes its task lists from browser storage. If storage fails
+  during deletion, Daymark attempts to restore the original saved data.
 - Plans are local to this browser profile and device. They are not synchronized
   to an account or another browser. Export backups regularly if the data matters.
 

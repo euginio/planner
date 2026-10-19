@@ -4,6 +4,7 @@ import type { ChangeEvent, KeyboardEvent } from 'react'
 import Sheet from './stories/Sheet'
 import presetListConf from './stories/presetListConf.json'
 import { createBackup, importBackup } from './backup'
+import { deletePlan, PLAN_NAMES_STORAGE_KEY } from './planStorage'
 import {
    isSheetNameList,
    readStoredJson,
@@ -14,7 +15,7 @@ import {
 import './styles/App.css'
 
 const AUTOMATIC_BACKUP_DATE_KEY = 'App.LastAutomaticBackupDate'
-const LS_SHEETS_KEY = 'App.Sheets'
+const LS_SHEETS_KEY = PLAN_NAMES_STORAGE_KEY
 const listNames = Object.keys(presetListConf)
 
 function getLocalDateKey(date: Date) {
@@ -104,7 +105,15 @@ function App() {
    }
    const deleteSheet = (s: string) => {
       if (!sheetsDataValid) return
-      setSheets(current => new Set([...current].filter(sheet => sheet !== s)))
+      try {
+         const updatedSheets = deletePlan(localStorage, s, [...sheets], listNames)
+         setSheets(new Set(updatedSheets))
+         reportStorageError(LS_SHEETS_KEY)
+         listNames.forEach(listName => reportStorageError(`${s}.${listName}`))
+      } catch (error) {
+         const message = error instanceof Error ? error.message : String(error)
+         reportStorageError(LS_SHEETS_KEY, message)
+      }
    }
 
    const downloadBackup = (planNames: string[]) => {

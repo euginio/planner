@@ -225,12 +225,27 @@ describe('App', () => {
 
    it('persists deletion of the last plan', async () => {
       localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
+      localStorage.setItem(
+         'Today.todos',
+         JSON.stringify([
+            {
+               id: 1,
+               focus: false,
+               text: 'Old task',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+         ])
+      )
       render(<App />)
 
       fireEvent.click(await screen.findByRole('button', { name: 'All plans' }))
       fireEvent.click(screen.getByRole('button', { name: 'Delete Today plan' }))
 
       expect(localStorage.getItem('App.Sheets')).toBe('[]')
+      expect(localStorage.getItem('Today.todos')).toBeNull()
    })
 
    it('imports a backup, replacing matching plans and preserving other plans', async () => {

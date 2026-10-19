@@ -60,6 +60,7 @@ const renderNavigableList = (navigableHandlers = createHandlers()) => {
             setIndentation: vi.fn(),
             setSize: vi.fn(),
             setText: vi.fn(),
+            reorderTask: vi.fn(),
             handleOnItemClick: vi.fn(),
          }}
          visible
@@ -95,8 +96,8 @@ describe('NavigableList', () => {
       fireEvent.keyDown(input, { key: 'Home', ctrlKey: true })
       fireEvent.keyDown(input, { key: 'End', ctrlKey: true })
 
-      expect(navigableHandlers.focusOnFirst).toHaveBeenCalledWith(1)
-      expect(navigableHandlers.focusOnLast).toHaveBeenCalledWith(1)
+      expect(navigableHandlers.focusOnFirst).toHaveBeenCalledOnce()
+      expect(navigableHandlers.focusOnLast).toHaveBeenCalledOnce()
    })
 
    it('adds a task before the current one when Enter is pressed at the start', () => {

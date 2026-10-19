@@ -1,10 +1,10 @@
-import { DEBUGG_MODE } from '../App'
 import TaskComp from './TaskComp'
 import ListInfo from './TaskInfo'
 import './DummyList.css'
 import { Task } from './List'
 import { ListConf } from './Sheet'
 import { helper } from '../helper'
+import type { TaskItemHandlers } from './handlers'
 
 const DummyList = ({
    list,
@@ -15,7 +15,7 @@ const DummyList = ({
 }: {
    list: Task[]
    name: string
-   itemHandlers: { [key: string]: (...a: any) => void }
+   itemHandlers: TaskItemHandlers
    listConfig: ListConf
    visible: boolean
 }) => {
@@ -28,9 +28,7 @@ const DummyList = ({
                ? helper.getWeekDay()
                : name}
          </h3>
-         {visible && listConfig.listLook.showListInfo && DEBUGG_MODE && (
-            <ListInfo list={list}></ListInfo>
-         )}
+         {visible && listConfig.listLook.showListInfo && <ListInfo list={list}></ListInfo>}
          {visible && (
             <ol className='taskItems'>
                {list.map(t => {

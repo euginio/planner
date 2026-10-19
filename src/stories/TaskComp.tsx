@@ -1,9 +1,9 @@
 import classNames from 'classnames'
 import React, { useEffect, useRef, useState } from 'react'
-import { DEBUGG_MODE } from '../App'
 import './Task.css'
 import { itemNavigationType } from './Sheet'
 import { HourPoint } from './HourPoint'
+import type { TaskItemHandlers } from './handlers'
 
 const TaskComp = ({
    id,
@@ -24,7 +24,7 @@ const TaskComp = ({
    size: number
    indentation: number
    impact: number
-   handlers: { [key: string]: (...a: any) => void }
+   handlers: TaskItemHandlers
    allowedActions: itemNavigationType
    liHour?: number
 }) => {
@@ -87,9 +87,8 @@ const TaskComp = ({
    }
 
    const handleInputKeyDown = (e: React.KeyboardEvent<HTMLLIElement>) => {
-      //['ctrlKey', 'shiftKey', 'altKey', 'metaKey']
       if (['Alt', 'Control'].includes(e.key)) {
-         e.preventDefault() // prevents put prompt at begining
+         e.preventDefault()
          e.stopPropagation()
       }
       if (e.key === 'Enter') {
@@ -133,56 +132,49 @@ const TaskComp = ({
    }
 
    return (
-      <>
-         <li
-            className={classNames('taskHolder', { dragging: isDragging })}
-            data-task-id={id}
-            onClick={() => handlers.handleOnItemClick(id)}
-            onKeyDown={handleInputKeyDown}
-         >
-            {allowedActions.sortable && allowedActions.dragAndDrop !== false && (
-               <button
-                  type='button'
-                  className='taskDragHandle'
-                  aria-label={`Reorder ${text || 'empty task'}`}
-                  aria-pressed={isDragging}
-                  onClick={e => e.stopPropagation()}
-                  onPointerDown={handleDragPointerDown}
-                  onPointerMove={handleDragPointerMove}
-                  onPointerUp={finishDrag}
-                  onPointerCancel={finishDrag}
-               >
-                  <span aria-hidden='true'>⠿</span>
-               </button>
-            )}
-            {liHour && <HourPoint hour={liHour} size={size}></HourPoint>}
-            <div
-               className={classNames('task', { showSize: size > 1 })}
-               style={{
-                  left: 20 * indentation,
-                  height: 20 * size,
-               }}
+      <li
+         className={classNames('taskHolder', { dragging: isDragging })}
+         data-task-id={id}
+         onClick={() => handlers.handleOnItemClick(id)}
+         onKeyDown={handleInputKeyDown}
+      >
+         {allowedActions.sortable && allowedActions.dragAndDrop !== false && (
+            <button
+               type='button'
+               className='taskDragHandle'
+               aria-label={`Reorder ${text || 'empty task'}`}
+               aria-pressed={isDragging}
+               onClick={e => e.stopPropagation()}
+               onPointerDown={handleDragPointerDown}
+               onPointerMove={handleDragPointerMove}
+               onPointerUp={finishDrag}
+               onPointerCancel={finishDrag}
             >
-               {focus ? (
-                  <input
-                     ref={taskInputRef}
-                     readOnly={!allowedActions?.editable}
-                     placeholder={allowedActions?.editable && !text ? 'Write a task...' : undefined}
-                     onChange={updateText}
-                     value={text}
-                     className={classNames('taskInput', {
-                        crossOut: done,
-                        labeledInput: !DEBUGG_MODE,
-                     })}
-                  />
-               ) : (
-                  <label className={classNames('taskLabel', { crossOut: done })}>
-                     {text || '_'}
-                  </label>
-               )}
-            </div>
-         </li>
-      </>
+               <span aria-hidden='true'>⠿</span>
+            </button>
+         )}
+         {liHour && <HourPoint hour={liHour} size={size}></HourPoint>}
+         <div
+            className={classNames('task', { showSize: size > 1 })}
+            style={{
+               left: 20 * indentation,
+               height: 20 * size,
+            }}
+         >
+            {focus ? (
+               <input
+                  ref={taskInputRef}
+                  readOnly={!allowedActions?.editable}
+                  placeholder={allowedActions?.editable && !text ? 'Write a task...' : undefined}
+                  onChange={updateText}
+                  value={text}
+                  className={classNames('taskInput', { crossOut: done })}
+               />
+            ) : (
+               <label className={classNames('taskLabel', { crossOut: done })}>{text || '_'}</label>
+            )}
+         </div>
+      </li>
    )
 }
 

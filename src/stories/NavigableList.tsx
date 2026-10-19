@@ -1,6 +1,7 @@
 import DummyList from './DummyList'
 import { Task } from './List'
 import { ListConf } from './Sheet'
+import type { NavigableHandlers, TaskItemHandlers } from './handlers'
 
 const NavigableList = ({
    name,
@@ -11,16 +12,16 @@ const NavigableList = ({
    visible,
 }: {
    name: string
-   navigableHandlers: { [key: string]: (...a: any) => void }
+   navigableHandlers: NavigableHandlers
    listConfig: ListConf
    list: Task[]
-   itemHandlers: { [key: string]: (...a: any) => void }
+   itemHandlers: TaskItemHandlers
    visible: boolean
-}) =>{
+}) => {
    const itemActions = listConfig.itemsNavigation
    const handleNavigableInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (['Alt', 'Control'].includes(e.key)) {
-         e.preventDefault() // prevents put prompt at begining
+         e.preventDefault()
          e.stopPropagation()
       }
       if (itemActions) {
@@ -35,25 +36,24 @@ const NavigableList = ({
             } else {
                navigableHandlers.focusUp(id)
             }
-            e.preventDefault() // prevents put prompt at begining
+            e.preventDefault()
          }
          if (e.key === 'ArrowDown') {
             if (e.altKey && itemActions.sortable) {
                navigableHandlers.moveDown(id)
             } else {
                navigableHandlers.focusDown(id)
-               // e.stopPropagation()
-               e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
+               e.preventDefault()
             }
          }
          if (e.ctrlKey) {
             if (e.key === 'End') {
-               navigableHandlers.focusOnLast(id)
-               e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
+               navigableHandlers.focusOnLast()
+               e.preventDefault()
             }
             if (e.key === 'Home') {
-               navigableHandlers.focusOnFirst(id)
-               e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
+               navigableHandlers.focusOnFirst()
+               e.preventDefault()
             }
          }
       }

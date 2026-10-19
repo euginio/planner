@@ -1,14 +1,14 @@
 import { useState } from 'react'
-import List, { Task } from './List'
+import List from './List'
 import './Sheet.css'
 import presetcon from './presetListConf.json'
+import type { SheetHandlers, TaskListMovement } from './handlers'
 
 interface ListActionsType {
    resetCompleted?: boolean
    removeTo?: string | null
    postponeTo?: string
    promoteTo?: string
-   removeAllTo?: string | null
    copyAllTo?: string
    clearCompletedTo?: string | null
 }
@@ -35,11 +35,9 @@ export interface ListConf {
    listActions: ListActionsType
    itemsNavigation: itemNavigationType
 }
-export interface TaskMovement {
-   targetTaskList: string
-   tasksToMove: Task[]
-   position: number
-}
+const listsConf = presetcon as Record<string, ListConf>
+const listNames = Object.keys(listsConf)
+
 function Sheet({
    name,
    onStorageError,
@@ -47,26 +45,18 @@ function Sheet({
    name: string
    onStorageError: (key: string, message?: string) => void
 }) {
-   // const listNames = ['todos', 'backlog', 'someday', 'done', 'deleted']
-
-   const PresetlistsConf: { [key: string]: ListConf } = presetcon as { [key: string]: ListConf }
-   const listsConf: { [key: string]: ListConf } = PresetlistsConf
-   const listNames = Object.keys(listsConf)
-
-   const [taskMovement, setTaskMovement] = useState<TaskMovement | undefined>()
+   const [taskMovement, setTaskMovement] = useState<TaskListMovement | undefined>()
    const [activeList, setActiveList] = useState(listNames[0])
-   // const [goal, SetGoal] = useState<string>()
 
-   const sheetHandlers: { [key: string]: (...a: any) => void } = {
+   const sheetHandlers: SheetHandlers = {
       taskMoved: () => setTaskMovement(undefined),
-      add: (items: Task[], targetTaskList: string, position: number = 0) =>
+      add: (items, targetTaskList, position = 0) =>
          setTaskMovement({ targetTaskList, tasksToMove: items, position }),
-      // focusedOnMe: taskListName => setTaskMovement(taskListName),
    }
 
    function handleKeyDown(e: React.KeyboardEvent) {
       if (['Alt', 'Control'].includes(e.key)) {
-         e.preventDefault() // prevents put prompt at begining
+         e.preventDefault()
          e.stopPropagation()
       }
       if (e.altKey && ['PageDown', 'PageUp'].includes(e.key)) {
@@ -78,13 +68,6 @@ function Sheet({
          }
       }
    }
-   // const goalActions: itemNavigationType = {
-   //    add: false,
-   //    editable: true,
-   //    completable: false,
-   //    sizeable: false,
-   //    sortable: false,
-   // }
    return (
       <div className='plannerBoard' onKeyDown={handleKeyDown}>
          <header className='boardHeading'>

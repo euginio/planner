@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { helper } from '../helper'
 import NavigableList from './NavigableList'
-import { ListConf, TaskMovement } from './Sheet'
+import type { ListConf } from './Sheet'
 import { isTaskList, readStoredJson, writeStoredJson } from '../storage'
-import { EditableTaskField, updateTaskField } from '../taskState'
+import { updateTaskField } from '../taskState'
+import type { EditableTaskField } from '../taskState'
+import type {
+   NavigableHandlers,
+   SheetHandlers,
+   TaskItemHandlers,
+   TaskListMovement,
+} from './handlers'
 import './List.css'
 
 export interface TaskI {
@@ -28,7 +35,6 @@ const defaultNewTask: TaskI = {
    indentation: 0,
 }
 
-// @param {itemActions} determines the posible actions for this list (add, editable, navigable, completable, sizeable, sortable)
 const List = ({
    sheetName,
    name,
@@ -42,8 +48,8 @@ const List = ({
    sheetName: string
    name: string
    listConfig: ListConf
-   sheetHandlers: { [key: string]: (...a: any) => void }
-   taskMovement: TaskMovement | undefined
+   sheetHandlers: SheetHandlers
+   taskMovement: TaskListMovement | undefined
    isActive: boolean
    activateHandler: (a: string) => void
    onStorageError: (key: string, message?: string) => void
@@ -115,7 +121,7 @@ const List = ({
    const handleInputKeyDown = (e: React.KeyboardEvent) => {
       if (loadError) return
       if (['Alt', 'Control'].includes(e.key)) {
-         e.preventDefault() // prevents put prompt at begining
+         e.preventDefault()
          e.stopPropagation()
       }
       const task = list.find(i => i.focus)
@@ -126,16 +132,16 @@ const List = ({
          (e.altKey || !task.text)
       ) {
          deleteItem(task.id)
-         e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
+         e.preventDefault()
       }
       if (e.altKey) {
          if (canPostpone && e.key === 'ArrowRight') {
             postpone(task.id)
-            e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
+            e.preventDefault()
          }
          if (listActions.promoteTo && e.key === 'ArrowLeft') {
             promote(task.id)
-            e.preventDefault() // prevents remove last char of the below task (when Backspace in empty task)
+            e.preventDefault()
          }
       }
    }
@@ -152,7 +158,7 @@ const List = ({
       setList(current => updateTaskField(current, id, field, value))
    }
 
-   const itemHandlers: { [key: string]: (...a: any) => void } = {
+   const itemHandlers: TaskItemHandlers = {
       setIndentation: (id: number, value: number) => setItemAttr(id, 'indentation', value),
       setSize: (id: number, value: number) => setItemAttr(id, 'size', value),
       setText: (id: number, value: string) => setItemAttr(id, 'text', value),
@@ -205,7 +211,7 @@ const List = ({
       })
    }
 
-   const navigableHandlers: { [key: string]: (...a: any) => void } = {
+   const navigableHandlers: NavigableHandlers = {
       addTask: (aboveId: number, positions: number) => addTask(aboveId, positions),
       moveUp: (id: number) => exchange(id, -1),
       moveDown: (id: number) => exchange(id, 1),
@@ -226,14 +232,14 @@ const List = ({
    const promote = (id: number) => migrateToListById(id, -1, listActions.promoteTo)
 
    const migrateToListById = (id: number, position: number, targetList?: string | null) => {
-      if (targetList === undefined) return //null allowed as target list
+      if (targetList === undefined) return
       const taskToMove = list.find(task => task.id === id)
       if (taskToMove?.text) sheetHandlers.add([taskToMove], targetList, position)
       remove(id)
    }
 
    const clearCompleted = () => {
-      if (listActions.clearCompletedTo === undefined) return //null allowed as target list
+      if (listActions.clearCompletedTo === undefined) return
       const parentLabel = helper.getWeekDay() + ' ' + new Date().toLocaleDateString()
       const parentTask = { ...defaultNewTask, text: parentLabel }
       sheetHandlers.add(
@@ -248,6 +254,7 @@ const List = ({
       setList(listcp)
    }
    const copyAllMarked = () => {
+      if (!listActions.copyAllTo) return
       sheetHandlers.add(
          list
             .filter(t => t.done)
@@ -268,9 +275,8 @@ const List = ({
       if (targetItem) {
          const listcp = [...list]
          const currentItem = listcp.find(t => t.id === id)!
-         //this swap items,
          listcp[currentIndex] = targetItem
-         listcp[targetIndexToMove] = { ...currentItem, indentation: targetItem.indentation } //copy indentation of target item
+         listcp[targetIndexToMove] = { ...currentItem, indentation: targetItem.indentation }
          setList(listcp)
       } else {
          if (targetIndexToMove < 0) promote(id)
@@ -329,9 +335,7 @@ const List = ({
          {!loadError && visible && listActions.resetCompleted && (
             <button onClick={resetCompleted}>Reset Completed</button>
          )}
-         {!loadError && listActions.copyAllTo && (
-            <button onClick={copyAllMarked}>Copy All</button>
-         )}
+         {!loadError && listActions.copyAllTo && <button onClick={copyAllMarked}>Copy All</button>}
          <button onClick={toggleVisibility}>{visible ? 'hide' : 'show'}</button>
       </section>
    )

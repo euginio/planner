@@ -88,7 +88,7 @@
    },
    "deleted": {
       "listLook": {},
-      "listActions": { "removeAllTo": null },
+      "listActions": {},
       "itemsNavigation": {
          "add": false,
          "editable": false,

@@ -1,5 +1,6 @@
 import classNames from 'classnames'
-import { useState, useRef, useEffect, useCallback, KeyboardEvent, ChangeEvent } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import type { ChangeEvent, KeyboardEvent } from 'react'
 import Sheet from './stories/Sheet'
 import presetListConf from './stories/presetListConf.json'
 import { createBackup, importBackup } from './backup'
@@ -12,8 +13,9 @@ import {
 } from './storage'
 import './App.css'
 
-export const DEBUGG_MODE = true
 const AUTOMATIC_BACKUP_DATE_KEY = 'App.LastAutomaticBackupDate'
+const LS_SHEETS_KEY = 'App.Sheets'
+const listNames = Object.keys(presetListConf)
 
 function getLocalDateKey(date: Date) {
    const year = date.getFullYear()
@@ -29,10 +31,7 @@ function App() {
    const [currentSheet, setCurrentSheet] = useState<string>()
    const [backupMessage, setBackupMessage] = useState<{ text: string; isError: boolean }>()
    const [storageErrors, setStorageErrors] = useState<Record<string, string>>({})
-   const LS_SHEETS_KEY = 'App.Sheets'
-   const inputAddSheet = useRef<HTMLInputElement>(null)
    const inputImportBackup = useRef<HTMLInputElement>(null)
-   const listNames = Object.keys(presetListConf)
    const reportStorageError = useCallback((key: string, message?: string) => {
       setStorageErrors(current => {
          if (!message) {
@@ -75,7 +74,7 @@ function App() {
 
    const handleGlobalInputKeyDown = (e: KeyboardEvent) => {
       if (['Alt', 'Control'].includes(e.key)) {
-         e.preventDefault() // prevents put prompt at begining
+         e.preventDefault()
          e.stopPropagation()
       }
       if (e.ctrlKey && ['PageDown', 'PageUp'].includes(e.key)) {
@@ -83,35 +82,29 @@ function App() {
          const sheetArray = [...sheets]
          const currentSheetIdx = sheetArray.findIndex(s => s === currentSheet)
          setCurrentSheet(sheetArray[currentSheetIdx + idxMove])
-         e.preventDefault() // prevents put prompt at begining
+         e.preventDefault()
          e.stopPropagation()
       }
    }
 
-   const handleInputKeyDown = (e: KeyboardEvent) => {
+   const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
       if (['Alt', 'Control'].includes(e.key)) {
-         e.preventDefault() // prevents put prompt at begining
+         e.preventDefault()
          e.stopPropagation()
       }
-      //@ts-ignore
-      if (e.key === 'Enter' && sheetsDataValid && inputAddSheet.current?.value.trim()) {
-         //@ts-ignore
-         const inputValue = inputAddSheet.current.value.trim()
-         setSheets(prevSheets => new Set(prevSheets).add(inputValue.trim()))
-         //@ts-ignore
-         inputAddSheet.current.value = ''
+      const input = e.currentTarget
+      if (e.key === 'Enter' && sheetsDataValid && input.value.trim()) {
+         const inputValue = input.value.trim()
+         setSheets(current => new Set([...current, inputValue]))
+         input.value = ''
       }
    }
    const handleSheetClick = (s: string) => {
-      let copy = s
-      setCurrentSheet(copy)
+      setCurrentSheet(s)
    }
    const deleteSheet = (s: string) => {
       if (!sheetsDataValid) return
-      setSheets(prevSheets => {
-         prevSheets.delete(s)
-         return new Set(prevSheets)
-      })
+      setSheets(current => new Set([...current].filter(sheet => sheet !== s)))
    }
 
    const downloadBackup = (planNames: string[]) => {
@@ -144,11 +137,7 @@ function App() {
       }
 
       try {
-         writeStoredValue(
-            localStorage,
-            AUTOMATIC_BACKUP_DATE_KEY,
-            getLocalDateKey(new Date())
-         )
+         writeStoredValue(localStorage, AUTOMATIC_BACKUP_DATE_KEY, getLocalDateKey(new Date()))
          reportStorageError(AUTOMATIC_BACKUP_DATE_KEY)
       } catch (error) {
          const message = error instanceof Error ? error.message : String(error)
@@ -279,7 +268,6 @@ function App() {
                         <input
                            id='new-plan'
                            type='text'
-                           ref={inputAddSheet}
                            onKeyDown={handleInputKeyDown}
                            placeholder='+ New plan'
                            disabled={!sheetsDataValid}

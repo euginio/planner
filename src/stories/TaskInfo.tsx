@@ -1,9 +1,10 @@
 import { Task } from './List'
 import TaskCounter from './TaskCounter'
+import './TaskInfo.css'
 
 function ListInfo({ list }: { list: Task[] }) {
    return (
-      <p style={{ display: 'inline' }}>
+      <p className='taskListInfo'>
          <TaskCounter tasks={list} condition={t => !t.done}>
             pending
          </TaskCounter>

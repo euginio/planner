@@ -23,7 +23,7 @@ const DummyList = ({
 
    return (
       <>
-         <h3 style={{ display: 'inline' }}>
+         <h3 className='taskListHeading'>
             {listConfig.listLook.lapse === 'day' && listConfig.listLook.showLapseName
                ? helper.getWeekDay()
                : name}

@@ -1,0 +1,13 @@
+.storyIntroduction {
+   max-width: 680px;
+   padding: 32px;
+   color: #1f3432;
+   font-family: 'Segoe UI', sans-serif;
+}
+
+.storyIntroductionEyebrow {
+   color: #668e80;
+   font-size: 12px;
+   font-weight: 700;
+   letter-spacing: 1.5px;
+}

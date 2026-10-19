@@ -1,10 +1,12 @@
+import './Introduction.css'
+
 export default {
    title: 'Planner/Introduction',
 }
 
 export const Overview = () => (
-   <main style={{ maxWidth: 680, padding: 32, color: '#1f3432', fontFamily: 'Segoe UI, sans-serif' }}>
-      <p style={{ color: '#668e80', fontSize: 12, fontWeight: 700, letterSpacing: 1.5 }}>
+   <main className='storyIntroduction'>
+      <p className='storyIntroductionEyebrow'>
          PLANNER COMPONENTS
       </p>
       <h1>Explore the planner in isolation</h1>

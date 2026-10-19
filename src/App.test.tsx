@@ -37,6 +37,52 @@ describe('App', () => {
       expect(screen.getByRole('heading', { level: 1, name: 'Today' })).toBeInTheDocument()
    })
 
+   it('keeps each plan’s tasks separate when switching plans quickly', async () => {
+      localStorage.setItem('App.Sheets', JSON.stringify(['Today', 'Later']))
+      localStorage.setItem(
+         'Today.todos',
+         JSON.stringify([
+            {
+               id: 1,
+               focus: true,
+               text: 'Plan today',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+         ])
+      )
+      localStorage.setItem(
+         'Later.todos',
+         JSON.stringify([
+            {
+               id: 1,
+               focus: false,
+               text: 'Plan later',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+         ])
+      )
+      render(<App />)
+
+      const todayInput = await screen.findByDisplayValue('Plan today')
+      fireEvent.change(todayInput, { target: { value: 'Updated today' } })
+      fireEvent.keyDown(todayInput, { key: 'PageDown', ctrlKey: true })
+
+      expect(await screen.findByRole('heading', { level: 1, name: 'Later' })).toBeInTheDocument()
+      expect(await screen.findByDisplayValue('Plan later')).toBeInTheDocument()
+      await waitFor(() => {
+         expect(JSON.parse(localStorage.getItem('Today.todos') || '[]')[0].text).toBe(
+            'Updated today'
+         )
+      })
+      expect(JSON.parse(localStorage.getItem('Later.todos') || '[]')[0].text).toBe('Plan later')
+   })
+
    it('preserves malformed plan data and offers backup recovery', async () => {
       const malformedPlans = '{not json'
       localStorage.setItem('App.Sheets', malformedPlans)
@@ -675,6 +721,15 @@ describe('App', () => {
                impact: 1,
                indentation: 0,
             },
+            {
+               id: 3,
+               focus: false,
+               text: 'Send follow-up',
+               done: true,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
          ])
       )
       render(<App />)
@@ -686,8 +741,9 @@ describe('App', () => {
       await waitFor(() => {
          const archived = JSON.parse(localStorage.getItem('Today.done') || '[]')
          const archivedTasks = archived.filter((task: { text: string }) => task.text)
-         expect(archivedTasks).toHaveLength(2)
+         expect(archivedTasks).toHaveLength(3)
          expect(archivedTasks[1].text).toBe('Prepare presentation')
+         expect(archivedTasks[2].text).toBe('Send follow-up')
       })
       const remaining = JSON.parse(localStorage.getItem('Today.todos') || '[]')
       expect(remaining.map((task: { text: string }) => task.text)).toEqual(['Review notes'])

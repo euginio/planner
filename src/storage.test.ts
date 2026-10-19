@@ -74,6 +74,35 @@ describe('validated local storage access', () => {
       ).toThrow('its format is invalid')
    })
 
+   it('rejects invalid task IDs, sizes, indentation, and multiple focused tasks', () => {
+      const validTask = {
+         id: 1,
+         focus: false,
+         text: 'Task',
+         done: false,
+         size: 1,
+         impact: 1,
+         indentation: 0,
+      }
+      const invalidLists = [
+         [{ ...validTask, id: 0 }],
+         [{ ...validTask, id: 1.5 }],
+         [{ ...validTask, size: 0 }],
+         [{ ...validTask, size: 1.5 }],
+         [{ ...validTask, indentation: -1 }],
+         [{ ...validTask, indentation: 0.5 }],
+         [{ ...validTask, focus: true }, { ...validTask, id: 2, focus: true }],
+      ]
+
+      for (const tasks of invalidLists) {
+         expect(isTaskList(tasks)).toBe(false)
+         localStorage.setItem('Today.todos', JSON.stringify(tasks))
+         expect(() => readStoredJson(localStorage, 'Today.todos', [], isTaskList)).toThrow(
+            'its format is invalid'
+         )
+      }
+   })
+
    it('reports write failures instead of hiding them', () => {
       const storage: Storage = {
          length: 0,

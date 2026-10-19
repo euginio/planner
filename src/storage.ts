@@ -2,7 +2,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
    return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-interface StoredTask {
+export interface StoredTask {
    id: number
    focus: boolean
    text: string
@@ -20,14 +20,18 @@ export function isTaskList(value: unknown): value is StoredTask[] {
       value.every(
          task =>
             isRecord(task) &&
-            Number.isFinite(task.id) &&
+            Number.isInteger(task.id) &&
+            (task.id as number) > 0 &&
             typeof task.focus === 'boolean' &&
             typeof task.text === 'string' &&
             typeof task.done === 'boolean' &&
-            Number.isFinite(task.size) &&
+            Number.isInteger(task.size) &&
+            (task.size as number) >= 1 &&
             Number.isFinite(task.impact) &&
-            Number.isFinite(task.indentation)
-      )
+            Number.isInteger(task.indentation) &&
+            (task.indentation as number) >= 0
+      ) &&
+      value.filter(task => isRecord(task) && task.focus === true).length <= 1
    )
 }
 

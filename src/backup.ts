@@ -1,4 +1,5 @@
 import {
+   StoredTask,
    isTaskList,
    readStoredJson,
    readStoredValue,
@@ -10,45 +11,18 @@ export const BACKUP_FORMAT = 'daymark-backup'
 export const BACKUP_VERSION = 1
 const SHEETS_STORAGE_KEY = 'App.Sheets'
 
-interface BackupTask {
-   id: number
-   focus: boolean
-   text: string
-   done: boolean
-   size: number
-   impact: number
-   indentation: number
-   [key: string]: unknown
-}
-
 export interface BackupPlan {
    name: string
-   lists: Record<string, BackupTask[]>
+   lists: Record<string, StoredTask[]>
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
    return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-function isBackupTask(value: unknown): value is BackupTask {
-   if (!isRecord(value)) return false
-   return (
-      Number.isFinite(value.id) &&
-      typeof value.focus === 'boolean' &&
-      typeof value.text === 'string' &&
-      typeof value.done === 'boolean' &&
-      Number.isFinite(value.size) &&
-      Number.isFinite(value.impact) &&
-      Number.isFinite(value.indentation)
-   )
-}
-
-function parseTaskList(value: unknown, context: string): BackupTask[] {
-   if (!Array.isArray(value) || !value.every(isBackupTask)) {
+function parseTaskList(value: unknown, context: string): StoredTask[] {
+   if (!isTaskList(value)) {
       throw new Error(`${context} must contain a valid task list.`)
-   }
-   if (new Set(value.map(task => task.id)).size !== value.length) {
-      throw new Error(`${context} must not contain duplicate task IDs.`)
    }
    return value
 }

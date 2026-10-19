@@ -123,26 +123,29 @@ describe('plan backups', () => {
       expect(localStorage.getItem('New.todos')).toBeNull()
    })
 
-   it('rejects duplicate task IDs at the backup boundary', () => {
-      const backup = JSON.stringify({
-         format: 'daymark-backup',
-         version: 1,
-         plans: [
-            {
-               name: 'Today',
-               lists: {
-                  todos: [task, { ...task, text: 'Second task' }],
-                  backlog: [],
-               },
-            },
-         ],
-      })
+   it('rejects task lists that violate task invariants at the backup boundary', () => {
+      const invalidLists = [
+         [{ ...task, id: 0 }],
+         [{ ...task, id: 1.5 }],
+         [{ ...task, size: 0 }],
+         [{ ...task, indentation: -1 }],
+         [{ ...task, focus: true }, { ...task, id: 2, focus: true }],
+         [task, { ...task, text: 'Second task' }],
+      ]
 
-      expect(() => importBackup(backup, localStorage, [], listNames)).toThrow(
-         'must not contain duplicate task IDs'
-      )
-      expect(localStorage.getItem('App.Sheets')).toBeNull()
-      expect(localStorage.getItem('Today.todos')).toBeNull()
+      for (const todos of invalidLists) {
+         const backup = JSON.stringify({
+            format: 'daymark-backup',
+            version: 1,
+            plans: [{ name: 'Today', lists: { todos, backlog: [] } }],
+         })
+
+         expect(() => importBackup(backup, localStorage, [], listNames)).toThrow(
+            'valid task list'
+         )
+         expect(localStorage.getItem('App.Sheets')).toBeNull()
+         expect(localStorage.getItem('Today.todos')).toBeNull()
+      }
    })
 
    it('rolls back all stored values when a write fails midway through import', () => {

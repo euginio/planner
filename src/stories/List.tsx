@@ -3,7 +3,13 @@ import { helper } from '../helper'
 import NavigableList from './NavigableList'
 import type { ListConf } from './Sheet'
 import { isTaskList, readStoredJson, writeStoredJson } from '../storage'
-import { updateTaskField } from '../taskState'
+import {
+   clearTaskFocus,
+   focusTask,
+   insertTask,
+   removeTaskAndFocusNeighbor,
+   updateTaskField,
+} from '../taskState'
 import type { EditableTaskField } from '../taskState'
 import type {
    NavigableHandlers,
@@ -147,11 +153,7 @@ const List = ({
    }
 
    const unFocusAll = () => {
-      if (list.length) {
-         let listcp = [...list]
-         listcp.forEach(i => (i.focus = false))
-         setList(listcp)
-      }
+      setList(current => clearTaskFocus(current))
    }
 
    const setItemAttr = <K extends EditableTaskField>(id: number, field: K, value: Task[K]) => {
@@ -183,10 +185,11 @@ const List = ({
    const addTask = (fromId?: number, positions: number = 1, taskToAdd?: TaskI) => {
       setList(prevlist => {
          const maxTaskId = prevlist.length ? Math.max(...prevlist.map(t => t.id || -1)) : 0
-         let newTask = {
+         const newTask: Task = {
             ...(taskToAdd
                ? {
                     ...taskToAdd,
+                    focus: false,
                     indentation: taskToAdd.parent
                        ? taskToAdd.parent.indentation + 1
                        : taskToAdd.indentation,
@@ -194,20 +197,7 @@ const List = ({
                : { ...defaultNewTask, focus: true }),
             id: maxTaskId + 1,
          }
-         let listcp = [...prevlist]
-         if (fromId) {
-            let fromTask = listcp.find(t => t.id === fromId)!
-            fromTask.focus = false
-            const aboveTaskIdx = listcp.findIndex(t => t.id === fromId)
-            listcp.splice(aboveTaskIdx + positions, 0, {
-               ...newTask,
-               indentation: fromTask.indentation,
-            })
-         } else {
-            if (positions === -1) listcp.push(newTask)
-            else listcp.unshift(newTask)
-         }
-         return listcp
+         return insertTask(prevlist, newTask, fromId, positions)
       })
    }
 
@@ -283,16 +273,8 @@ const List = ({
          else if (targetIndexToMove > list.length - 1) postpone(id)
       }
    }
-   const isBottomItem = (id: number) => list.findIndex(t => t.id === id) === list.length - 1
    const remove = (id: number) => {
-      if (isBottomItem(id)) {
-         navigableHandlers.focusUp(id)
-      } else {
-         navigableHandlers.focusDown(id)
-      }
-      const listcp = [...list]
-      const updatedlist = listcp.filter(i => i.id !== id)
-      setList(updatedlist)
+      setList(current => removeTaskAndFocusNeighbor(current, id))
    }
 
    const slideFocus = (id: number, positions: number) => {
@@ -302,10 +284,7 @@ const List = ({
    }
 
    const focusOn = (id: number) => {
-      unFocusAll()
-      let listcp = [...list]
-      listcp.find(i => i.id === id)!.focus = true
-      setList(listcp)
+      setList(current => focusTask(current, id))
    }
    const toggleVisibility = () => setVisible(!visible)
 

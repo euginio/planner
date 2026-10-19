@@ -3,6 +3,7 @@ import { helper } from '../helper'
 import NavigableList from './NavigableList'
 import { ListConf, TaskMovement } from './Sheet'
 import { isTaskList, readStoredJson, writeStoredJson } from '../storage'
+import { EditableTaskField, updateTaskField } from '../taskState'
 import './List.css'
 
 export interface TaskI {
@@ -117,7 +118,8 @@ const List = ({
          e.preventDefault() // prevents put prompt at begining
          e.stopPropagation()
       }
-      const task = list.find(i => i.focus)!
+      const task = list.find(i => i.focus)
+      if (!task) return
       if (
          listActions.removeTo !== undefined &&
          (e.key === 'Backspace' || e.key === 'Delete') &&
@@ -146,11 +148,8 @@ const List = ({
       }
    }
 
-   const setItemAttr = (id: number, attr: string, value: any) => {
-      let listcp = [...list]
-      //@ts-ignore
-      listcp.find(i => i.id === id)[attr] = value
-      setList(listcp)
+   const setItemAttr = <K extends EditableTaskField>(id: number, field: K, value: Task[K]) => {
+      setList(current => updateTaskField(current, id, field, value))
    }
 
    const itemHandlers: { [key: string]: (...a: any) => void } = {

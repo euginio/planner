@@ -16,6 +16,7 @@ interface StoredTask {
 export function isTaskList(value: unknown): value is StoredTask[] {
    return (
       Array.isArray(value) &&
+      new Set(value.map(task => (isRecord(task) ? task.id : undefined))).size === value.length &&
       value.every(
          task =>
             isRecord(task) &&

@@ -123,6 +123,28 @@ describe('plan backups', () => {
       expect(localStorage.getItem('New.todos')).toBeNull()
    })
 
+   it('rejects duplicate task IDs at the backup boundary', () => {
+      const backup = JSON.stringify({
+         format: 'daymark-backup',
+         version: 1,
+         plans: [
+            {
+               name: 'Today',
+               lists: {
+                  todos: [task, { ...task, text: 'Second task' }],
+                  backlog: [],
+               },
+            },
+         ],
+      })
+
+      expect(() => importBackup(backup, localStorage, [], listNames)).toThrow(
+         'must not contain duplicate task IDs'
+      )
+      expect(localStorage.getItem('App.Sheets')).toBeNull()
+      expect(localStorage.getItem('Today.todos')).toBeNull()
+   })
+
    it('rolls back all stored values when a write fails midway through import', () => {
       localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
       localStorage.setItem('Today.todos', JSON.stringify([{ ...task, text: 'Original' }]))

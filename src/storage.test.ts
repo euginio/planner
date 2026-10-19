@@ -45,6 +45,35 @@ describe('validated local storage access', () => {
       ).toBe(true)
    })
 
+   it('rejects task records with duplicate IDs within a list', () => {
+      const duplicateTasks = [
+         {
+            id: 1,
+            focus: false,
+            text: 'First task',
+            done: false,
+            size: 1,
+            impact: 1,
+            indentation: 0,
+         },
+         {
+            id: 1,
+            focus: false,
+            text: 'Second task',
+            done: false,
+            size: 1,
+            impact: 1,
+            indentation: 0,
+         },
+      ]
+
+      expect(isTaskList(duplicateTasks)).toBe(false)
+      localStorage.setItem('Today.todos', JSON.stringify(duplicateTasks))
+      expect(() =>
+         readStoredJson(localStorage, 'Today.todos', [], isTaskList)
+      ).toThrow('its format is invalid')
+   })
+
    it('reports write failures instead of hiding them', () => {
       const storage: Storage = {
          length: 0,

@@ -111,6 +111,31 @@ describe('App', () => {
       expect(localStorage.getItem('Today.todos')).toBe(malformedTasks)
    })
 
+   it('ignores list keyboard shortcuts when a list has no focused task', async () => {
+      localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
+      localStorage.setItem(
+         'Today.fixed',
+         JSON.stringify([
+            {
+               id: 1,
+               focus: false,
+               text: 'Reference task',
+               done: false,
+               size: 1,
+               impact: 1,
+               indentation: 0,
+            },
+         ])
+      )
+      render(<App />)
+
+      const copyAllButton = await screen.findByRole('button', { name: 'Copy All' })
+      expect(() => fireEvent.keyDown(copyAllButton, { key: 'Delete' })).not.toThrow()
+      expect(JSON.parse(localStorage.getItem('Today.fixed') || '[]')[0].text).toBe(
+         'Reference task'
+      )
+   })
+
    it('reports when task changes cannot be saved', async () => {
       localStorage.setItem('App.Sheets', JSON.stringify(['Today']))
       const originalSetItem = localStorage.setItem.bind(localStorage)

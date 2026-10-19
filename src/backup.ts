@@ -47,6 +47,9 @@ function parseTaskList(value: unknown, context: string): BackupTask[] {
    if (!Array.isArray(value) || !value.every(isBackupTask)) {
       throw new Error(`${context} must contain a valid task list.`)
    }
+   if (new Set(value.map(task => task.id)).size !== value.length) {
+      throw new Error(`${context} must not contain duplicate task IDs.`)
+   }
    return value
 }
 
